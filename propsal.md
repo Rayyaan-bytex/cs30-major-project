@@ -11,6 +11,7 @@
 - Let user select a cell and input a number in it
 - Check if user has made a mistake (number added in cell turns red)
 - Add a 'Mistakes:' Counter 
+- let user delete the number added
 - Check if user has completed the level
 - Atleast 2 difficulty levels
 
