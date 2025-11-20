@@ -1,9 +1,11 @@
-// Project Title
-// Your Name
-// Date
+// Major Project - Sudoku
+// Rayyaan Chaghtai
+// 
 //
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
+
+// class {}
 
 
 function setup() {
@@ -12,5 +14,4 @@ function setup() {
 
 function draw() {
   background(220);
-  circle(50, 50, 50);
 }
