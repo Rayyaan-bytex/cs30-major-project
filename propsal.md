@@ -8,7 +8,7 @@
 ## Needs To Have
 
 - An Interactive 9 x 9 Grid     
-- Few numbers already added in the grid
+- Few helper numbers already added in the grid
 - Let user select a cell and input a number in it
 - Check if user has made a mistake (number added in cell turns red)
 - Add a 'Mistakes:' Counter 
