@@ -14,6 +14,7 @@
 - Add a 'Mistakes:' Counter 
 - let user delete the number added
 - Check if user has completed the level
+- Add a restart button
 - Atleast 2 difficulty levels
 
 ## Nice To Have
