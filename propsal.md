@@ -4,6 +4,7 @@
 
 - For my Major Project, I plan to make a simple Sudoku game in which the user will have to fill a 9 x 9 grid with numbers
 - Each column, row, and a 3 x 3 subgrid contains each number from 1 to 9 exactly once
+- <!-- https://www.websudoku.com/ -->
 
 ## Needs To Have
 
@@ -15,7 +16,7 @@
 - let user delete the number added
 - Check if user has completed the level
 - Add a restart button
-- Atleast 2 difficulty levels
+- Adding Sound effects
 
 ## Nice To Have
 
@@ -23,7 +24,7 @@
 - When user selects a cell, highlight its row, column, and the 3x3 grid bow it's in
 - Let user reveal the answer for the selected level
 - Adding a Timer for difficulty (Counter)
-- Adding Sound effects
+- Atleast 2 difficulty levels
 
 ## Taking it to the Next Level
 - A System that examines the puzzle and suggests logical moves
