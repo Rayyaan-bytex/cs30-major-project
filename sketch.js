@@ -12,7 +12,7 @@ function setup() {
 }
 
 function draw() {
-  background("#ce7e9fff");
+  background("#e09db9ff");
   textAlign(LEFT, CENTER);
   fill("#2e351dff");
   textSize(70);
@@ -33,6 +33,8 @@ function draw() {
   textSize(30);
   text("TIPS FOR SOLVING", width / 2 - 900, height / 2 + 60);
 
-  textSize(23);
-  text("• Focus on Empty Spaces");
+  textSize(20);
+  text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n To make them easier to fill in.\n•Don't Guess, Use Logic: \
+    Don't make a random guess.\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n Most frequently in the grid"
+  , width / 2 - 900, height / 2 + 180);
 }

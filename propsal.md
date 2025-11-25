@@ -15,7 +15,7 @@
 - Add a 'Mistakes:' Counter 
 - let user delete the number added
 - Check if user has completed the level
-- Add a restart button
+- Add a restart bustton
 - Adding Sound effects
 
 ## Nice To Have
