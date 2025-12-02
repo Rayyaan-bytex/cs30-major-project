@@ -12,14 +12,18 @@
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
 }
+
 
 function draw() {
   background("#e09db9ff");
   textAlign(LEFT, CENTER);
   fill("#2e351dff");
   textFont("Montserrat");
+
+  // Adding Text (Instructions, Headings, etc
+  strokeWeight(1);
+  noStroke();
 
   textSize(70);
   text("SUDOKU", width / 2 - 900, height / 2 - 380);
@@ -41,30 +45,61 @@ function draw() {
   text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n To make them easier to fill in.\n•Don't Guess, Use Logic:\
  Don't make a random guess.\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n Most frequently in the grid"
   , width / 2 - 900, height / 2 + 180);
+  
+  // Dividing Line
 
-
+  stroke(0);
+  strokeWeight(1);
   let lineX = width / 2 - 425;
   line(lineX, 0, lineX, height);
 
+  // Draw Sudoku Grid
+
   let cellSize = 80;
   let gridSize = cellSize * 9;
-  let gridX = width / 2 - 300 + 225;
+  let gridX = width / 2 - 360;
   let gridY = height / 2 - 300;
 
   // Draw Main Sudoku Grid
-  for (let rows = 0; rows < 9; rows++) {
-    for (let cols = 0; cols < 9; cols++) {
+  noStroke();
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
       fill("#8a8888ff");
-      rect(gridX + cols * cellSize, gridY + rows * cellSize, cellSize, cellSize);
+      rect(gridX + col * cellSize, gridY + row * cellSize, cellSize, cellSize);
     }
   }
 
-  // Make 3X3 lines thicker 
-  strokeWeight(3);
-  for (let i = 0; i < 9; i++) {
-    line(gridX, gridY + i * cellSize, gridX + gridSize, gridY + i * cellSize);
+  // Make 3X3 lines thick + thin
+  stroke(0);
+
+  // Make Border Thick
+  strokeWeight(4);
+  noFill();
+  rect(gridX, gridY, gridSize, gridSize);
+
+  // Horizontal Lines
+  for (let i = 1; i < 9; i++) {
+    if (i % 3 === 0) {
+      strokeWeight(4);
+    }
+    else {
+      strokeWeight(1);
+    }
+    let y = gridY + i * cellSize
+    line(gridX, y, gridX + gridSize, y);
   }
+
+  // Verticle Lines
+  for (let j = 1; j < 9; j++) {
+    if (j % 3 === 0) {
+      strokeWeight(4);
+    }
+    else {
+      strokeWeight(1);
+    }
+    let x = gridX + j * cellSize;
+    line(x, gridY, x, gridY + gridSize);
+  }
+
+  strokeWeight(1);
 }
-
-
-// https://projecteuler.net/resources/documents/0096_sudoku.txt 
