@@ -57,8 +57,8 @@ function draw() {
 
   let cellSize = 80;
   let gridSize = cellSize * 9;
-  let gridX = width / 2 - 360;
-  let gridY = height / 2 - 300;
+  let gridX = width / 2 - 50;
+  let gridY = height / 2 - 320;
 
   // Draw Main Sudoku Grid
   noStroke();
@@ -73,26 +73,26 @@ function draw() {
   stroke(0);
 
   // Make Border Thick
-  strokeWeight(4);
+  strokeWeight(3);
   noFill();
   rect(gridX, gridY, gridSize, gridSize);
 
   // Horizontal Lines
   for (let i = 1; i < 9; i++) {
     if (i % 3 === 0) {
-      strokeWeight(4);
+      strokeWeight(3);
     }
     else {
       strokeWeight(1);
     }
-    let y = gridY + i * cellSize
+    let y = gridY + i * cellSize;
     line(gridX, y, gridX + gridSize, y);
   }
 
   // Verticle Lines
   for (let j = 1; j < 9; j++) {
     if (j % 3 === 0) {
-      strokeWeight(4);
+      strokeWeight(3);
     }
     else {
       strokeWeight(1);
