@@ -6,12 +6,17 @@
 // - describe what you did to take this project "above and beyond"
 
 
+let nums;
 
+function preload() {
+  nums = loadStrings("puzzles.txt");
+}
 
 
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  console.log(nums);
 }
 
 

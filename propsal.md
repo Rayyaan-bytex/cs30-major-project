@@ -5,6 +5,7 @@
 - For my Major Project, I plan to make a simple Sudoku game in which the user will have to fill a 9 x 9 grid with numbers
 - Each column, row, and a 3 x 3 subgrid contains each number from 1 to 9 exactly once
 - <!-- https://www.websudoku.com/ -->
+- <!--https://projecteuler.net/resources/documents/0096_sudoku.txt-->
 
 ## Needs To Have
 
@@ -28,3 +29,4 @@
 
 ## Taking it to the Next Level
 - A System that examines the puzzle and suggests logical moves
+
