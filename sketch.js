@@ -6,17 +6,31 @@
 // - describe what you did to take this project "above and beyond"
 
 
-let nums;
+let puzzleLines;
+let puzzles = [];
 
+// Loads the text file containing 10 sudoku puzzles 
 function preload() {
-  nums = loadStrings("puzzles.txt");
+  puzzleLines = loadStrings("puzzles.txt");
 }
 
 
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  console.log(nums);
+
+  // Extracts the file into puzzles
+
+  let tempPuzzle = [];        // Holds one puzzle
+
+  // Loop through all lines loaded from the file
+  for (let line of puzzleLines) {
+
+    // Skip lines like "Grid 01", etc"
+    if (line[0] === "G") {
+      continue;
+    }
+  }
 }
 
 
