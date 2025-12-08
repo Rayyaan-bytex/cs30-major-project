@@ -19,18 +19,32 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  // Extracts the file into puzzles
+  // Extracts the text file into puzzles
 
   let tempPuzzle = [];        // Holds one puzzle
 
   // Loop through all lines loaded from the file
   for (let line of puzzleLines) {
 
-    // Skip lines like "Grid 01", etc"
+    // Skip lines like 'Grid 01'"
     if (line[0] === "G") {
       continue;
     }
+    
+    // Add the puzzle in temporary array
+    tempPuzzle.push(line);
+    
+    // Once the 9 lines are collected, store the puzzle
+    if (tempPuzzle.length === 9) {
+      puzzles.push([tempPuzzle]);       // Stores the Puzzle
+      tempPuzzle = [];
+    }
   }
+
+  // Select a Random Puzzle from the text file
+  let index = floor(random(puzzles.length));
+  chosenPuzzle = puzzles[index];
+  console.log(chosenPuzzle);
 }
 
 
@@ -74,10 +88,10 @@ function draw() {
 
   // Draw Sudoku Grid
 
-  let cellSize = 80;
+  let cellSize = 85;
   let gridSize = cellSize * 9;
-  let gridX = width / 2 - 50;
-  let gridY = height / 2 - 320;
+  let gridX = width / 2 - 70;
+  let gridY = height / 2 - 350;
 
   // Draw Main Sudoku Grid
   noStroke();
