@@ -45,6 +45,11 @@ function setup() {
   let index = floor(random(puzzles.length));
   chosenPuzzle = puzzles[index];
   console.log(chosenPuzzle);
+
+
+  // Convert the puzzle numbers into the 9x9 Grid
+  currentGrid = convertToGrid(chosenPuzzle);
+  console.table(currentGrid);
 }
 
 
@@ -135,4 +140,19 @@ function draw() {
   }
 
   strokeWeight(1);
+}
+
+
+// Convert the puzzle number into the 9x9 grid
+function convertToGrid() {
+  let grid = [];
+
+  for (let i = 0; i < 9; i++) {
+    let row = [];
+    for (let j = 0; j < 9; j++) {
+      row.push(puzzleLines[i][j]);
+    }
+    grid.push[row];
+  }
+  return grid;
 }
