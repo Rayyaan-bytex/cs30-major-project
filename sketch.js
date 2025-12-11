@@ -8,6 +8,8 @@
 
 let puzzleLines;
 let puzzles = [];
+let chosenPuzzle;
+let currentGrid;
 
 // Loads the text file containing 10 sudoku puzzles 
 function preload() {
@@ -32,11 +34,11 @@ function setup() {
     }
     
     // Add the puzzle in temporary array
-    tempPuzzle.push(line);
+    tempPuzzle.push(line);    
     
     // Once the 9 lines are collected, store the puzzle
     if (tempPuzzle.length === 9) {
-      puzzles.push([tempPuzzle]);       // Stores the Puzzle
+      puzzles.push([...tempPuzzle]);       // Stores the Puzzle
       tempPuzzle = [];
     }
   }
@@ -144,15 +146,15 @@ function draw() {
 
 
 // Convert the puzzle number into the 9x9 grid
-function convertToGrid() {
+function convertToGrid(puzzle) {
   let grid = [];
 
   for (let i = 0; i < 9; i++) {
     let row = [];
     for (let j = 0; j < 9; j++) {
-      row.push(puzzleLines[i][j]);
+      row.push(int(puzzle[i][j]));      // int converts "5" to 5
     }
-    grid.push[row];
+    grid.push(row);
   }
   return grid;
 }
