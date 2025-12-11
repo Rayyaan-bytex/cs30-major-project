@@ -142,17 +142,36 @@ function draw() {
   }
 
   strokeWeight(1);
+
+  // Draw the Sudoku numbers
+  textAlign(CENTER, CENTER);
+  // textFont("Roboto Slab");
+  fill(0);
+  textSize(40);
+
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      let value  = currentGrid[row][col];
+
+      // Only draw numbers 1 - 9, not zero
+      if (value !== 0) {
+        let x = gridX + col * cellSize + cellSize / 2; 
+        let y = gridY + row * cellSize + cellSize / 2;
+        text(value, x, y);
+      }
+    }
+  }
 }
 
 
-// Convert the puzzle number into the 9x9 grid
+// Convert the puzzle numbers into the 9x9 grid
 function convertToGrid(puzzle) {
   let grid = [];
 
   for (let i = 0; i < 9; i++) {
     let row = [];
     for (let j = 0; j < 9; j++) {
-      row.push(int(puzzle[i][j]));      // int converts "5" to 5
+      row.push(int(puzzle[i][j]));      // int converts the text like "5" to a number 5
     }
     grid.push(row);
   }
