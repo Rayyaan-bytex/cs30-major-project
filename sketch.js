@@ -10,7 +10,7 @@ let puzzleLines;
 let puzzles = [];
 let chosenPuzzle;
 let currentGrid;
-let selectedRow = -1
+let selectedRow = -1;
 let selectedCol = -1;
 
 // Loads the text file containing 10 sudoku puzzles 
@@ -40,7 +40,7 @@ function setup() {
     
     // Once the 9 lines are collected, store the puzzle
     if (tempPuzzle.length === 9) {
-      puzzles.push([...tempPuzzle]);       // Stores the Puzzle
+      puzzles.push(concat(tempPuzzle));       // Stores the Puzzle  USE CONCAT()
       tempPuzzle = [];
     }
   }
@@ -204,11 +204,28 @@ function mousePressed() {
       mouseX < gridX + cellSize * 9 &&
       mouseY >= gridY &&
       mouseY < gridY + cellSize * 9) {
-        // Calculate the column and row
-        selectedCol = floor((mouseX - gridX) / cellSize);
-        selectedRow = floor((mouseY - gridY) / cellSize);
+    // Calculate the column and row
+    selectedCol = floor((mouseX - gridX) / cellSize);
+    selectedRow = floor((mouseY - gridY) / cellSize);
 
-        console.log("Selected row:", selectedRow);
-        console.log("Selected col:", selectedCol);
-      }
+    // console.log("Selected row:", selectedRow);
+    // console.log("Selected col:", selectedCol);
+  }
 }
+
+
+// Let User Enter and Delete Numbers
+function keyPressed() {
+  if (selectedRow !== -1 && selectedCol !== -1) {       // Allow to input only if cell is selected
+    // Enter Numbers 1 - 9
+    if (key >= 1 && key <= 9) {
+      currentGrid[selectedRow][selectedCol] = int(key);
+    }
+    // Delete Numbers (Backspace and Delete)
+    if (keyCode === BACKSPACE || keyCode === DELETE) {
+      currentGrid[selectedRow][selectedCol] = 0;
+    }
+  }
+}
+
+// FEEDBACK -------  DON'T LET USER CHANGE OR DELETE HELPER NUMBERS   ----  HELPER NUMBERS SHOULD BE STATIONERY AND UNEDITABLE   ---- WORK ON  OTHER STUFF
