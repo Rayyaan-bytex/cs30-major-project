@@ -10,6 +10,8 @@ let puzzleLines;
 let puzzles = [];
 let chosenPuzzle;
 let currentGrid;
+let selectedRow = -1
+let selectedCol = -1;
 
 // Loads the text file containing 10 sudoku puzzles 
 function preload() {
@@ -109,6 +111,17 @@ function draw() {
     }
   }
 
+  // Highlight Selected Cell
+  if (selectedRow !== -1 && selectedCol!== -1) {
+    noStroke();
+    fill(255, 255, 0, 120);     // Highlighted with yellow color with transparency
+
+    let highlightX = gridX + selectedCol * cellSize;
+    let highlightY = gridY + selectedRow * cellSize;
+
+    rect(highlightX, highlightY, cellSize, cellSize);       // Draw a rectangle over the selected cell to highlight it
+  }
+
   // Make 3X3 lines thick + thin
   stroke(0);
 
@@ -151,13 +164,13 @@ function draw() {
 
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
-      let value  = currentGrid[row][col];
+      let cellValue  = currentGrid[row][col];
 
       // Only draw numbers 1 - 9, not zero
-      if (value !== 0) {
+      if (cellValue !== 0) {
         let x = gridX + col * cellSize + cellSize / 2; 
         let y = gridY + row * cellSize + cellSize / 2;
-        text(value, x, y);
+        text(cellValue, x, y);
       }
     }
   }
@@ -176,4 +189,26 @@ function convertToGrid(puzzle) {
     grid.push(row);
   }
   return grid;
+}
+
+
+// Detects which Sudoku cell the user clicks and stores its row and column
+function mousePressed() {
+  // Grid Position and Size
+  let cellSize = 85;
+  let gridX = width / 2 - 70;
+  let gridY = height / 2 - 350;
+
+  // Check if mouse is inside the grid
+  if (mouseX >= gridX && 
+      mouseX < gridX + cellSize * 9 &&
+      mouseY >= gridY &&
+      mouseY < gridY + cellSize * 9) {
+        // Calculate the column and row
+        selectedCol = floor((mouseX - gridX) / cellSize);
+        selectedRow = floor((mouseY - gridY) / cellSize);
+
+        console.log("Selected row:", selectedRow);
+        console.log("Selected col:", selectedCol);
+      }
 }
