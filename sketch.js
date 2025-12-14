@@ -12,6 +12,7 @@ let chosenPuzzle;
 let currentGrid;
 let selectedRow = -1;
 let selectedCol = -1;
+let fixedGrid;
 
 // Loads the text file containing 10 sudoku puzzles 
 function preload() {
@@ -40,7 +41,7 @@ function setup() {
     
     // Once the 9 lines are collected, store the puzzle
     if (tempPuzzle.length === 9) {
-      puzzles.push(concat(tempPuzzle));       // Stores the Puzzle  USE CONCAT()
+      puzzles.push(tempPuzzle.concat());       // Stores the Puzzle  USE CONCAT()
       tempPuzzle = [];
     }
   }
@@ -54,6 +55,9 @@ function setup() {
   // Convert the puzzle numbers into the 9x9 Grid
   currentGrid = convertToGrid(chosenPuzzle);
   console.table(currentGrid);
+
+  // Copy original grid so the helper numbers are fixed
+  fixedGrid = copyGrid(currentGrid);
 }
 
 
@@ -158,9 +162,9 @@ function draw() {
 
   // Draw the Sudoku numbers
   textAlign(CENTER, CENTER);
-  // textFont("Roboto Slab");
+  textFont("Montserrat Light");
   fill(0);
-  textSize(40);
+  textSize(45);
 
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
@@ -192,6 +196,17 @@ function convertToGrid(puzzle) {
 }
 
 
+// Makes a copy of a 2D grid so the original puzzle cannot be changed
+function copyGrid(grid) {
+  let newGrid = [];
+  for (let row = 0; row < 9; row++) {
+    newGrid.push(grid[row].concat());     // creates a copy of the row array
+  }
+
+  return newGrid;
+}
+
+
 // Detects which Sudoku cell the user clicks and stores its row and column
 function mousePressed() {
   // Grid Position and Size
@@ -214,18 +229,18 @@ function mousePressed() {
 }
 
 
-// Let User Enter and Delete Numbers
+// Let User Enter and Delete Numbers (Not the Helper Numbers)
 function keyPressed() {
   if (selectedRow !== -1 && selectedCol !== -1) {       // Allow to input only if cell is selected
-    // Enter Numbers 1 - 9
-    if (key >= 1 && key <= 9) {
-      currentGrid[selectedRow][selectedCol] = int(key);
-    }
-    // Delete Numbers (Backspace and Delete)
-    if (keyCode === BACKSPACE || keyCode === DELETE) {
-      currentGrid[selectedRow][selectedCol] = 0;
+    if (fixedGrid[selectedRow][selectedCol] === 0) {    // Only let user edit if NOT a helper number
+      // Enter Numbers 1 - 9
+      if (key >= 1 && key <= 9) {
+        currentGrid[selectedRow][selectedCol] = int(key);
+      }
+      // Delete Numbers (Backspace and Delete)
+      if (keyCode === BACKSPACE || keyCode === DELETE) {
+        currentGrid[selectedRow][selectedCol] = 0;
+      }       
     }
   }
 }
-
-// FEEDBACK -------  DON'T LET USER CHANGE OR DELETE HELPER NUMBERS   ----  HELPER NUMBERS SHOULD BE STATIONERY AND UNEDITABLE   ---- WORK ON  OTHER STUFF
