@@ -41,7 +41,7 @@ function setup() {
     
     // Once the 9 lines are collected, store the puzzle
     if (tempPuzzle.length === 9) {
-      puzzles.push(tempPuzzle.concat());       // Stores the Puzzle  USE CONCAT()
+      puzzles.push(tempPuzzle.concat());       // Stores the Puzzle  
       tempPuzzle = [];
     }
   }
@@ -162,7 +162,7 @@ function draw() {
 
   // Draw the Sudoku numbers
   textAlign(CENTER, CENTER);
-  textFont("Montserrat Light");
+  textFont("Uni Sans");         // ############### WORK ON THIS ###############
   fill(0);
   textSize(45);
 
@@ -178,6 +178,36 @@ function draw() {
       }
     }
   }
+}
+
+
+// Checks whether a move by user follows Sudoku Rules (Row, Column, 3x3 Box)
+function isValidMove(row, col, value) {
+  // Checks Row
+  for (let c = 0; c < 9; c++) {       
+    if (c!== col && currentGrid[row][c] === value) {      // Ignores the current column
+      return false;     // If same number already exists in this row, return false
+    }
+  }
+  // Checks Column
+  for (let r = 0; r < 9; r++) {       
+    if (r!== row && currentGrid[r][col] === value) {      // Ignores the current row
+      return false;     // If same number already exists in this column, return false
+    }
+  }
+  // Checks 3x3 Box
+  let boxRowStart = floor(row / 3) * 3;     // Finds the starting row of 3x3 Box
+  let boxColStart = floor(col / 3) * 3;     // Finds the starting col of 3x3 Box
+
+  for (let r = boxRowStart; r < boxRowStart + 3; r++) {
+    for (let c = boxColStart; c < boxColStart + 3; c++) {
+      if (r!== row || c!== col && currentGrid[c][r] === value ) {     
+        return false;     // If number already exists in box, return false
+      }
+    }
+  }
+  // Return true if move passes all checks
+  return true;
 }
 
 
