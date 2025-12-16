@@ -13,6 +13,7 @@ let currentGrid;
 let selectedRow = -1;
 let selectedCol = -1;
 let fixedGrid;
+let mistakeGrid;
 
 // Loads the text file containing 10 sudoku puzzles 
 function preload() {
@@ -43,6 +44,16 @@ function setup() {
     if (tempPuzzle.length === 9) {
       puzzles.push(tempPuzzle.concat());       // Stores the Puzzle  
       tempPuzzle = [];
+    }
+
+    // Initialize mistakes grid
+    mistakeGrid = [];     
+    for (let r = 0; r < 9; r++) {
+      row = [];
+      for (let c = 0; c < 9; c++) {
+        row.push(false);  // No mistakes at the start
+      }
+      mistakeGrid.push(row);
     }
   }
 
@@ -201,7 +212,7 @@ function isValidMove(row, col, value) {
 
   for (let r = boxRowStart; r < boxRowStart + 3; r++) {
     for (let c = boxColStart; c < boxColStart + 3; c++) {
-      if (r!== row || c!== col && currentGrid[c][r] === value ) {     
+      if ((r!== row || c!== col) && currentGrid[c][r] === value ) {     
         return false;     // If number already exists in box, return false
       }
     }
@@ -252,9 +263,6 @@ function mousePressed() {
     // Calculate the column and row
     selectedCol = floor((mouseX - gridX) / cellSize);
     selectedRow = floor((mouseY - gridY) / cellSize);
-
-    // console.log("Selected row:", selectedRow);
-    // console.log("Selected col:", selectedCol);
   }
 }
 
@@ -263,10 +271,16 @@ function mousePressed() {
 function keyPressed() {
   if (selectedRow !== -1 && selectedCol !== -1) {       // Allow to input only if cell is selected
     if (fixedGrid[selectedRow][selectedCol] === 0) {    // Only let user edit if NOT a helper number
+
       // Enter Numbers 1 - 9
-      if (key >= 1 && key <= 9) {
-        currentGrid[selectedRow][selectedCol] = int(key);
+      if (key >= 1 && key <= 9) {        
+        // Place number only if move follows the Sudoku rules
+        let num = int(key);     // Comverts text to number
+        if (isValidMove(selectedRow, selectedCol, num)) {
+          currentGrid[selectedRow][selectedCol] = num;
+        }
       }
+
       // Delete Numbers (Backspace and Delete)
       if (keyCode === BACKSPACE || keyCode === DELETE) {
         currentGrid[selectedRow][selectedCol] = 0;
