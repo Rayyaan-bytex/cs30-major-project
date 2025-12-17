@@ -173,7 +173,7 @@ function draw() {
 
   // Draw the Sudoku numbers
   textAlign(CENTER, CENTER);
-  textFont("Uni Sans");         // ############### WORK ON THIS ###############
+  textFont("Uni Sans");         // ############### WORK ON THIS (FONTT) ###############
   fill(0);
   textSize(45);
 
@@ -183,6 +183,14 @@ function draw() {
 
       // Only draw numbers 1 - 9, not zero
       if (cellValue !== 0) {
+
+        // Draw Mistakes in Red
+        if (mistakeGrid[row][col]) {
+          fill(200, 0, 0);
+        }
+        else {
+          fill(0);
+        }
         let x = gridX + col * cellSize + cellSize / 2; 
         let y = gridY + row * cellSize + cellSize / 2;
         text(cellValue, x, y);
@@ -269,22 +277,22 @@ function mousePressed() {
 
 // Let User Enter and Delete Numbers (Not the Helper Numbers)
 function keyPressed() {
-  if (selectedRow !== -1 && selectedCol !== -1) {       // Allow to input only if cell is selected
-    if (fixedGrid[selectedRow][selectedCol] === 0) {    // Only let user edit if NOT a helper number
+  if (selectedRow !== -1 && selectedCol !== -1) {         // Allow to input only if cell is selected
+    if (fixedGrid[selectedRow][selectedCol] === 0) {      // Only let user edit if NOT a helper number
 
       // Enter Numbers 1 - 9
       if (key >= 1 && key <= 9) {        
         // Place number only if move follows the Sudoku rules
         let num = int(key);     // Comverts text to number
-        if (isValidMove(selectedRow, selectedCol, num)) {
-          currentGrid[selectedRow][selectedCol] = num;
-        }
+        currentGrid[selectedRow][selectedCol] = num;
+        mistakeGrid[selectedRow][selectedCol] = !isValidMove(selectedRow, selectedCol, num);
       }
 
       // Delete Numbers (Backspace and Delete)
       if (keyCode === BACKSPACE || keyCode === DELETE) {
         currentGrid[selectedRow][selectedCol] = 0;
-      }       
+        mistakeGrid[selectedRow][selectedCol] = false;
+      }
     }
   }
 }
