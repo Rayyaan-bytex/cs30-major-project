@@ -49,7 +49,7 @@ function setup() {
     // Initialize mistakes grid
     mistakeGrid = [];     
     for (let r = 0; r < 9; r++) {
-      row = [];
+      let row = [];
       for (let c = 0; c < 9; c++) {
         row.push(false);  // No mistakes at the start
       }
@@ -177,22 +177,22 @@ function draw() {
   fill(0);
   textSize(45);
 
-  for (let row = 0; row < 9; row++) {
-    for (let col = 0; col < 9; col++) {
-      let cellValue  = currentGrid[row][col];
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      let cellValue  = currentGrid[r][c];
 
       // Only draw numbers 1 - 9, not zero
       if (cellValue !== 0) {
 
         // Draw Mistakes in Red
-        if (mistakeGrid[row][col]) {
+        if (mistakeGrid[r][c]) {
           fill(200, 0, 0);
         }
         else {
           fill(0);
         }
-        let x = gridX + col * cellSize + cellSize / 2; 
-        let y = gridY + row * cellSize + cellSize / 2;
+        let x = gridX + c * cellSize + cellSize / 2; 
+        let y = gridY + r * cellSize + cellSize / 2;
         text(cellValue, x, y);
       }
     }
@@ -220,7 +220,7 @@ function isValidMove(row, col, value) {
 
   for (let r = boxRowStart; r < boxRowStart + 3; r++) {
     for (let c = boxColStart; c < boxColStart + 3; c++) {
-      if ((r!== row || c!== col) && currentGrid[c][r] === value ) {     
+      if ((r!== row || c!== col) && currentGrid[r][c] === value ) {     
         return false;     // If number already exists in box, return false
       }
     }
