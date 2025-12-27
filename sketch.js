@@ -14,6 +14,8 @@ let selectedRow = -1;
 let selectedCol = -1;
 let fixedGrid;
 let mistakeGrid;
+let cellLocked = false;
+
 
 // Loads the text file containing 10 sudoku puzzles 
 function preload() {
@@ -49,11 +51,11 @@ function setup() {
     // Initialize mistakes grid
     mistakeGrid = [];     
     for (let r = 0; r < 9; r++) {
-      let row = [];
+      let rowArray = [];
       for (let c = 0; c < 9; c++) {
-        row.push(false);  // No mistakes at the start
+        rowArray.push(false);  // No mistakes at the start
       }
-      mistakeGrid.push(row);
+      mistakeGrid.push(rowArray);
     }
   }
 
@@ -200,6 +202,23 @@ function draw() {
 }
 
 
+// Recheck Entire Board After Every Move
+function updateMistakes() {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      let value = currentGrid[r][c];      // Store the number currently in this cell
+
+      if (value !== 0 && fixedGrid[r][c] === 0) {     // Only check cells that aren't empty and helper numbers
+        mistakeGrid[r][c] = !isValidMove(r, c, value);      // Returns true if number follows the Sudoku rules
+      }
+      else {
+        mistakeGrid[r][c] = false;
+      }
+    }
+  }
+}
+
+
 // Checks whether a move by user follows Sudoku Rules (Row, Column, 3x3 Box)
 function isValidMove(row, col, value) {
   // Checks Row
@@ -235,11 +254,11 @@ function convertToGrid(puzzle) {
   let grid = [];
 
   for (let i = 0; i < 9; i++) {
-    let row = [];
+    let rowArray = [];
     for (let j = 0; j < 9; j++) {
-      row.push(int(puzzle[i][j]));      // int converts the text like "5" to a number 5
+      rowArray.push(int(puzzle[i][j]));      // int converts the text like "5" to a number 5
     }
-    grid.push(row);
+    grid.push(rowArray);
   }
   return grid;
 }
@@ -269,30 +288,38 @@ function mousePressed() {
       mouseY >= gridY &&
       mouseY < gridY + cellSize * 9) {
     // Calculate the column and row
-    selectedCol = floor((mouseX - gridX) / cellSize);
-    selectedRow = floor((mouseY - gridY) / cellSize);
+    let newCol = floor((mouseX - gridX) / cellSize);
+    let newRow = floor((mouseY - gridY) / cellSize);
+    // If clicking a different cell, unlock the input to enter new number
+    if (newRow !== selectedRow || newCol !== selectedCol) {
+      cellLocked = false;
+    }
+    // Store the new selected cell
+    selectedCol = newCol;
+    selectedRow = newRow
   }
 }
 
 
 // Let User Enter and Delete Numbers (Not the Helper Numbers)
 function keyPressed() {
-  if (selectedRow !== -1 && selectedCol !== -1) {         // Allow to input only if cell is selected
-    if (fixedGrid[selectedRow][selectedCol] === 0) {      // Only let user edit if NOT a helper number
-
-      // Enter Numbers 1 - 9
-      if (key >= 1 && key <= 9) {        
-        // Place number only if move follows the Sudoku rules
-        let num = int(key);     // Comverts text to number
-        currentGrid[selectedRow][selectedCol] = num;
-        mistakeGrid[selectedRow][selectedCol] = !isValidMove(selectedRow, selectedCol, num);
-      }
-
-      // Delete Numbers (Backspace and Delete)
-      if (keyCode === BACKSPACE || keyCode === DELETE) {
-        currentGrid[selectedRow][selectedCol] = 0;
-        mistakeGrid[selectedRow][selectedCol] = false;
-      }
-    }
+  if (selectedRow === -1 || selectedCol === -1) {     // If no cell is selected, do nothing
+    return;
+  }
+  if (fixedGrid[selectedRow][selectedCol] !== 0) {      // if the cell is a hellper number, do nothing
+    return;
+  }
+  if (cellLocked && key >= "1" && key <= "9") {     // Prevent overwriting a number unless the cell has been unlocked by clicking it again
+    return;
+  }
+  if (key >= "1" && key <= "9") {     // If user presses a number 1 - 9
+    currentGrid[selectedRow][selectedCol] = int(key);     // Place number into selected cell
+    cellLocked = true;      // Lock the cell so the user can't overwrite it instantly
+    updateMistakes();     // Recheck entire grid for mistakes
+  }
+  if (keyCode === BACKSPACE || keyCode === DELETE) {      // If user presses backspace or delete
+    currentGrid[selectedRow][selectedCol] = 0;      // Clear the selected cell
+    cellLocked = false;     // unlock cell after removing number
+    updateMistakes();
   }
 }
