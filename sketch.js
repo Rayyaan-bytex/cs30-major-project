@@ -7,9 +7,13 @@
 
 
 let puzzleLines;
+let solutionLines;
 let puzzles = [];
+let solutions = [];
 let chosenPuzzle;
+let chosenSolution = [];
 let currentGrid;
+let solutionGrid;
 let selectedRow = -1;
 let selectedCol = -1;
 let fixedGrid;
@@ -20,6 +24,7 @@ let cellLocked = false;
 // Loads the text file containing 10 sudoku puzzles 
 function preload() {
   puzzleLines = loadStrings("puzzles.txt");
+  solutionLines = loadStrings("solutions.txt");
 }
 
 
@@ -30,44 +35,52 @@ function setup() {
   // Extracts the text file into puzzles
 
   let tempPuzzle = [];        // Holds one puzzle
+  let tempSolution = [];
 
-  // Loop through all lines loaded from the file
+  // - - - READ PUZZLES - - - Loop through all lines loaded from the file 
   for (let line of puzzleLines) {
 
     // Skip lines like 'Grid 01'"
-    if (line[0] === "G") {
+    if (line[0] === "G")
       continue;
-    }
-    
-    // Add the puzzle in temporary array
-    tempPuzzle.push(line);    
-    
-    // Once the 9 lines are collected, store the puzzle
+    tempPuzzle.push(line);        // Add the puzzle in temporary array
+
     if (tempPuzzle.length === 9) {
-      puzzles.push(tempPuzzle.concat());       // Stores the Puzzle  
+      puzzles.push(tempPuzzle.concat());
       tempPuzzle = [];
     }
+  }
 
-    // Initialize mistakes grid
-    mistakeGrid = [];     
-    for (let r = 0; r < 9; r++) {
-      let rowArray = [];
-      for (let c = 0; c < 9; c++) {
-        rowArray.push(false);  // No mistakes at the start
-      }
-      mistakeGrid.push(rowArray);
+  // - - - READ SOLUTIONS - - - 
+  for (let line of solutionLines) {
+    if (line[0] === "G")
+      continue;
+    tempSolution.push(line);
+
+    if (tempSolution.length === 9) {
+      solutions.push(tempSolution.concat());
+      tempSolution = [];
     }
+  }
+
+  // Initialize mistakes grid
+  mistakeGrid = [];
+  for (let r = 0; r < 9; r++) {
+    let rowArray = [];
+    for (let c = 0; c < 9; c++) {
+      rowArray.push(false);  // No mistakes at the start
+    }
+    mistakeGrid.push(rowArray);
   }
 
   // Select a Random Puzzle from the text file
   let index = floor(random(puzzles.length));
   chosenPuzzle = puzzles[index];
-  console.log(chosenPuzzle);
-
+  chosenSolution = solutions[index];
 
   // Convert the puzzle numbers into the 9x9 Grid
   currentGrid = convertToGrid(chosenPuzzle);
-  console.table(currentGrid);
+  solutionGrid = convertToGrid(chosenSolution);
 
   // Copy original grid so the helper numbers are fixed
   fixedGrid = copyGrid(currentGrid);
@@ -91,9 +104,9 @@ function draw() {
   text("HOW TO PLAY", width / 2 - 900, height / 2 - 280);
 
   textSize(23);
-  text("To complete the Sudoku grid\nEnter numbers into the blank spaces\nSo that each row, column, and 3x3 box\nContains the numbers 1 - 9 without repitition", 
+  text("To complete the Sudoku grid\nEnter numbers into the blank spaces\nSo that each row, column, and 3x3 box\nContains the numbers 1 - 9 without repitition",
     width / 2 - 900, height / 2 - 195);
-  
+
   textSize(30);
   text("DIFFICULTY LEVELS", width / 2 - 900, height / 2 - 80);
 
@@ -103,8 +116,8 @@ function draw() {
   textSize(20);
   text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n To make them easier to fill in.\n•Don't Guess, Use Logic:\
  Don't make a random guess.\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n Most frequently in the grid"
-  , width / 2 - 900, height / 2 + 180);
-  
+    , width / 2 - 900, height / 2 + 180);
+
   // Dividing Line
 
   stroke(0);
@@ -129,7 +142,7 @@ function draw() {
   }
 
   // Highlight Selected Cell
-  if (selectedRow !== -1 && selectedCol!== -1) {
+  if (selectedRow !== -1 && selectedCol !== -1) {
     noStroke();
     fill(255, 255, 0, 120);     // Highlighted with yellow color with transparency
 
@@ -181,7 +194,7 @@ function draw() {
 
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
-      let cellValue  = currentGrid[r][c];
+      let cellValue = currentGrid[r][c];
 
       // Only draw numbers 1 - 9, not zero
       if (cellValue !== 0) {
@@ -193,7 +206,7 @@ function draw() {
         else {
           fill(0);
         }
-        let x = gridX + c * cellSize + cellSize / 2; 
+        let x = gridX + c * cellSize + cellSize / 2;
         let y = gridY + r * cellSize + cellSize / 2;
         text(cellValue, x, y);
       }
@@ -222,14 +235,14 @@ function updateMistakes() {
 // Checks whether a move by user follows Sudoku Rules (Row, Column, 3x3 Box)
 function isValidMove(row, col, value) {
   // Checks Row
-  for (let c = 0; c < 9; c++) {       
-    if (c!== col && currentGrid[row][c] === value) {      // Ignores the current column
+  for (let c = 0; c < 9; c++) {
+    if (c !== col && currentGrid[row][c] === value) {      // Ignores the current column
       return false;     // If same number already exists in this row, return false
     }
   }
   // Checks Column
-  for (let r = 0; r < 9; r++) {       
-    if (r!== row && currentGrid[r][col] === value) {      // Ignores the current row
+  for (let r = 0; r < 9; r++) {
+    if (r !== row && currentGrid[r][col] === value) {      // Ignores the current row
       return false;     // If same number already exists in this column, return false
     }
   }
@@ -239,7 +252,7 @@ function isValidMove(row, col, value) {
 
   for (let r = boxRowStart; r < boxRowStart + 3; r++) {
     for (let c = boxColStart; c < boxColStart + 3; c++) {
-      if ((r!== row || c!== col) && currentGrid[r][c] === value ) {     
+      if ((r !== row || c !== col) && currentGrid[r][c] === value) {
         return false;     // If number already exists in box, return false
       }
     }
@@ -283,10 +296,10 @@ function mousePressed() {
   let gridY = height / 2 - 350;
 
   // Check if mouse is inside the grid
-  if (mouseX >= gridX && 
-      mouseX < gridX + cellSize * 9 &&
-      mouseY >= gridY &&
-      mouseY < gridY + cellSize * 9) {
+  if (mouseX >= gridX &&
+    mouseX < gridX + cellSize * 9 &&
+    mouseY >= gridY &&
+    mouseY < gridY + cellSize * 9) {
     // Calculate the column and row
     let newCol = floor((mouseX - gridX) / cellSize);
     let newRow = floor((mouseY - gridY) / cellSize);
