@@ -19,12 +19,14 @@ let selectedCol = -1;
 let fixedGrid;
 let mistakeGrid;
 let cellLocked = false;
+let mistakeCount = 0;
+let gameWon = false;
 
 
 // Loads the text file containing 10 sudoku puzzles 
 function preload() {
-  puzzleLines = loadStrings("puzzles.txt");
-  solutionLines = loadStrings("solutions.txt");
+  puzzleLines = loadStrings("puzzles_hard.txt");
+  solutionLines = loadStrings("solutions_hard.txt");
 }
 
 
@@ -141,6 +143,11 @@ function draw() {
     }
   }
 
+  // Display Mistake Counter
+  textSize(45);
+  fill(0);
+  text("Mistakes: " + mistakeCount, width / 2 - 375, height / 2 - 275)
+
   // Highlight Selected Cell
   if (selectedRow !== -1 && selectedCol !== -1) {
     noStroke();
@@ -184,11 +191,18 @@ function draw() {
     line(x, gridY, x, gridY + gridSize);
   }
 
+  if (gameWon) {
+    textAlign(CENTER, CENTER);
+    textSize(80);
+    fill(0, 180, 0);
+    text("YOU WIN!", width / 2 + 250, height / 2);
+  }
+
   strokeWeight(1);
 
   // Draw the Sudoku numbers
   textAlign(CENTER, CENTER);
-  textFont("Uni Sans");         // ############### WORK ON THIS (FONTT) ###############
+  textFont("light montessarat");    
   fill(0);
   textSize(45);
 
@@ -221,13 +235,23 @@ function updateMistakes() {
     for (let c = 0; c < 9; c++) {
       let value = currentGrid[r][c];      // Store the number currently in this cell
 
-      if (value !== 0 && fixedGrid[r][c] === 0) {     // Only check cells that aren't empty and helper numbers
-        mistakeGrid[r][c] = !isValidMove(r, c, value);      // Returns true if number follows the Sudoku rules
+      if (value === 0 || fixedGrid[r][c] !== 0) {     // Only check cells that aren't empty and helper numbers
+        mistakeGrid[r][c] = false;      // Ignores empty cells and original helper numbers
+        continue;
+      }
+      if (!isCorrectCell(r, c)) {
+        if (!mistakeGrid[r][c]) {
+          mistakeCount++;
+        }
+        mistakeGrid[r][c] = true;
       }
       else {
         mistakeGrid[r][c] = false;
       }
     }
+  }
+  if (checkWin()) {
+    gameWon = true;
   }
 }
 
@@ -258,6 +282,28 @@ function isValidMove(row, col, value) {
     }
   }
   // Return true if move passes all checks
+  return true;
+}
+
+
+// Check if a Single Cell Matches the Solution
+function isCorrectCell(row, col) {
+  return currentGrid[row][col] === solutionGrid[row][col];      // Check user input with the solution
+}
+
+
+function checkWin() {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (currentGrid[r][c] === 0) {
+        return false;
+      }
+
+      if (currentGrid[r][c] !== solutionGrid[r][c]) {
+        return false;
+      }
+    }
+  }
   return true;
 }
 
@@ -316,6 +362,9 @@ function mousePressed() {
 
 // Let User Enter and Delete Numbers (Not the Helper Numbers)
 function keyPressed() {
+  if (gameWon) {
+    return;
+  }
   if (selectedRow === -1 || selectedCol === -1) {     // If no cell is selected, do nothing
     return;
   }
