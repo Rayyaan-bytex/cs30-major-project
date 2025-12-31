@@ -195,7 +195,7 @@ function draw() {
     textAlign(CENTER, CENTER);
     textSize(80);
     fill(0, 180, 0);
-    text("YOU WIN!", width / 2 + 250, height / 2);
+    text("YOU WIN!", gridX + gridSize / 2, gridY - 40);
   }
 
   strokeWeight(1);
