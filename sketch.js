@@ -21,6 +21,9 @@ let mistakeGrid;
 let cellLocked = false;
 let mistakeCount = 0;
 let gameWon = false;
+let restartX, restartY, restartW, restartH;
+let startGrid;
+let revealX, revealY, revealW, revealH;
 
 
 // Loads the text file containing 10 sudoku puzzles 
@@ -86,6 +89,9 @@ function setup() {
 
   // Copy original grid so the helper numbers are fixed
   fixedGrid = copyGrid(currentGrid);
+  // console.log("SOLUTION GRID: ");
+  // console.table(solutionGrid);
+  startGrid = copyGrid(currentGrid);      // Save original puzzle for restart
 }
 
 
@@ -132,7 +138,8 @@ function draw() {
   let cellSize = 85;
   let gridSize = cellSize * 9;
   let gridX = width / 2 - 70;
-  let gridY = height / 2 - 350;
+  let gridY = height / 2 - 320;
+  let topBarY = gridY - 110;
 
   // Draw Main Sudoku Grid
   noStroke();
@@ -144,9 +151,47 @@ function draw() {
   }
 
   // Display Mistake Counter
-  textSize(45);
+  textSize(40);
   fill(0);
-  text("Mistakes: " + mistakeCount, width / 2 - 375, height / 2 - 275)
+  textAlign(RIGHT, CENTER);
+  text("Mistakes: " + mistakeCount, gridX + gridSize, topBarY + restartH / 2);
+  textAlign(LEFT, CENTER);
+  
+  // Draw Clear Button
+  restartW = 210;
+  restartH = 65;
+  restartX = gridX;
+  restartY = topBarY;
+
+  stroke(0);
+  strokeWeight(2);
+  fill(255);
+  rect(restartX, restartY, restartW, restartH, 10);
+
+  noStroke();
+  fill(0);
+  textSize(28);
+  textAlign(CENTER, CENTER);
+  text("CLEAR", restartX + restartW / 2, restartY + restartH / 2);
+  textAlign(LEFT, CENTER);
+
+  // Draw Reveal Answers Button
+  revealW = 230;
+  revealH = restartH;
+  revealX = gridX + gridSize / 2 - revealW / 2;
+  revealY = topBarY;
+
+  stroke(0);
+  strokeWeight(2);
+  fill(255);
+  rect(revealX, revealY, revealW, revealH, 10);
+
+  noStroke();
+  fill(0);
+  textSize(22);
+  textAlign(CENTER, CENTER);
+  text("REVEAL ANSWER", revealX + revealW / 2, revealY + revealH / 2);
+  textAlign(LEFT, CENTER);
 
   // Highlight Selected Cell
   if (selectedRow !== -1 && selectedCol !== -1) {
@@ -193,9 +238,9 @@ function draw() {
 
   if (gameWon) {
     textAlign(CENTER, CENTER);
-    textSize(80);
-    fill(0, 180, 0);
-    text("YOU WIN!", gridX + gridSize / 2, gridY - 40);
+    textSize(75);
+    fill("#545454");
+    text("YOU\nWIN!", lineX / 2 + 450 , height / 2);
   }
 
   strokeWeight(1);
@@ -252,6 +297,8 @@ function updateMistakes() {
   }
   if (checkWin()) {
     gameWon = true;
+    selectedRow = -1;
+    selectedCol = -1;
   }
 }
 
@@ -334,12 +381,67 @@ function copyGrid(grid) {
 }
 
 
+// Restart Current Puzzle
+function restartGame() {
+  currentGrid = copyGrid(startGrid);    // reset puzzle
+  fixedGrid = copyGrid(startGrid);      // reset helper numbers
+  mistakeCount = 0;
+  gameWon = false;
+  cellLocked = false;
+  selectedRow = -1;
+  selectedCol = -1;
+
+  // Clear mistake highlights
+  for (let r = 0; r < 9; r++) {   
+    for (let c = 0; c < 9; c++) {
+      mistakeGrid[r][c] = false;
+    }
+  }
+}
+
+
+// Reveal Full Solution On The Board
+function revealAnswer() {
+  currentGrid = copyGrid(solutionGrid);     // Show the solution
+  cellLocked = true;
+  selectedRow = -1;
+  selectedCol = -1;
+
+  // Clear Mistake Highlights
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      mistakeGrid[r][c] = false;
+    }
+  }
+  
+  gameWon = true;
+}
+
+
 // Detects which Sudoku cell the user clicks and stores its row and column
 function mousePressed() {
+  // Restart Button Click
+  if (mouseX > restartX &&
+      mouseX < restartX + restartW &&
+      mouseY > restartY &&
+      mouseY < restartY + restartH) {
+        restartGame();
+        return;
+      }
+
+  // Restart Button Click
+  if (mouseX > revealX &&
+      mouseX < revealX + revealW &&
+      mouseY > revealY &&
+      mouseY < revealY + revealH) {
+        revealAnswer();
+        return;
+      }
+
   // Grid Position and Size
   let cellSize = 85;
   let gridX = width / 2 - 70;
-  let gridY = height / 2 - 350;
+  let gridY = height / 2 - 320;
 
   // Check if mouse is inside the grid
   if (mouseX >= gridX &&
