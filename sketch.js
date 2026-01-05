@@ -140,23 +140,29 @@ function draw() {
   let gridSize = cellSize * 9;
   let gridX = width / 2 - 70;
   let gridY = height / 2 - 320;
-  let topBarX = gridX - 40;
+  let topBarX = -20;
   let topBarY = gridY - 110;
   let barGap = 20;
-  let mistakesX = gridX + topBarX;
-
-  // Draw Main Sudoku Grid
-  noStroke();
-  for (let row = 0; row < 9; row++) {
-    for (let col = 0; col < 9; col++) {
-      fill("#8a8888ff");
-      rect(gridX + col * cellSize, gridY + row * cellSize, cellSize, cellSize);
-    }
-  }
-  // Draw Clear Button
+  
+  // Sizes
   restartW = 210;
   restartH = 65;
-  restartX = topBarX + 220;
+  revealW = 230;
+  revealH = restartH;
+  newW = 210;
+  newH = restartH
+
+  let barX = gridX + topBarX;
+
+  // Display Mistake Counter
+  textSize(40);
+  fill(0);
+  textAlign(LEFT, CENTER);
+  text("Mistakes: " + mistakeCount, barX - 25, topBarY + restartH / 2);
+
+  let mistakesTextW = textWidth("Mistakes: ", mistakeCount);
+
+  restartX = barX + mistakesTextW + barGap;
   restartY = topBarY;
 
   stroke(0);
@@ -169,11 +175,8 @@ function draw() {
   textSize(28);
   textAlign(CENTER, CENTER);
   text("CLEAR", restartX + restartW / 2, restartY + restartH / 2);
-  textAlign(LEFT, CENTER);
 
   // Draw Reveal Answers Button
-  revealW = 230;
-  revealH = restartH;
   revealX = restartX + restartW + barGap;
   revealY = topBarY;
 
@@ -187,20 +190,10 @@ function draw() {
   textSize(22);
   textAlign(CENTER, CENTER);
   text("REVEAL ANSWER", revealX + revealW / 2, revealY + revealH / 2);
-  textAlign(LEFT, CENTER);
 
   // New Puzzle Button
-  newW = 210;
-  newH = restartH;
-  newX = revealX + restartW + barGap;
+  newX = revealX + revealW + barGap;
   newY = topBarY;
-
-  // Display Mistake Counter
-  textSize(40);
-  fill(0);
-  textAlign(LEFT, CENTER);
-  text("Mistakes: " + mistakeCount, topBarX, topBarY + restartH / 2);
-  textAlign(LEFT, CENTER);
 
   stroke(0);
   strokeWeight(2);
@@ -213,6 +206,15 @@ function draw() {
   textAlign(CENTER, CENTER);
   text("NEW PUZZLE", newX + newW / 2, newY + newH / 2);
   textAlign(LEFT, CENTER);
+
+  // Draw Main Sudoku Grid
+  noStroke();
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      fill("#8a8888ff");
+      rect(gridX + col * cellSize, gridY + row * cellSize, cellSize, cellSize);
+    }
+  }
 
 
   // Highlight Selected Cell
