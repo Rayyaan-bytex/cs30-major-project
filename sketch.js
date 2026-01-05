@@ -27,6 +27,34 @@ let revealX, revealY, revealW, revealH;
 let newX, newY, newW, newH;
 
 
+class SudokuBoard {
+  constructor(puzzles, solutions) {
+    this.puzzles = puzzles;
+    this.solutions = solutions;
+
+    this.selectedRow = -1;
+    this.selectedCol = -1;
+    this.cellLocked = false;
+    this.mistakeCount = 0;
+    this.gameWon = false;
+
+    this.restartX = 0;
+    this.restartY = 0;
+    this.restartW = 0;
+    this.restartH = 0;
+    this.revealX = 0;
+    this.revealY = 0;
+    this.revealW = 0;
+    this.revealH = 0;
+    this.newX = 0;
+    this.newY = 0;
+    this.newW = 0;
+    this.newH = 0;
+    
+  }
+}
+
+
 // Loads the text file containing 10 sudoku puzzles 
 function preload() {
   puzzleLines = loadStrings("puzzles_hard.txt");
@@ -125,7 +153,7 @@ function draw() {
   textSize(20);
   text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n To make them easier to fill in.\n•Don't Guess, Use Logic:\
  Don't make a random guess.\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n Most frequently in the grid"
-    , width / 2 - 900, height / 2 + 180);
+  , width / 2 - 900, height / 2 + 180);
 
   // Dividing Line
 
@@ -143,14 +171,14 @@ function draw() {
   let topBarX = -20;
   let topBarY = gridY - 110;
   let barGap = 20;
-  
+
   // Sizes
   restartW = 210;
   restartH = 65;
   revealW = 230;
   revealH = restartH;
   newW = 210;
-  newH = restartH
+  newH = restartH;
 
   let barX = gridX + topBarX;
 
@@ -160,7 +188,7 @@ function draw() {
   textAlign(LEFT, CENTER);
   text("Mistakes: " + mistakeCount, barX - 25, topBarY + restartH / 2);
 
-  let mistakesTextW = textWidth("Mistakes: ", mistakeCount);
+  let mistakesTextW = textWidth("Mistakes: ");
 
   restartX = barX + mistakesTextW + barGap;
   restartY = topBarY;
@@ -264,14 +292,14 @@ function draw() {
     textAlign(CENTER, CENTER);
     textSize(75);
     fill("#428475ff");
-    text("YOU\nWIN!", lineX / 2 + 450 , height / 2);
+    text("YOU\nWIN!", lineX / 2 + 450, height / 2);
   }
 
   strokeWeight(1);
 
   // Draw the Sudoku numbers
   textAlign(CENTER, CENTER);
-  textFont("light montessarat");    
+  textFont("light montessarat");
   fill(0);
   textSize(45);
 
@@ -416,7 +444,7 @@ function restartGame() {
   selectedCol = -1;
 
   // Clear mistake highlights
-  for (let r = 0; r < 9; r++) {   
+  for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       mistakeGrid[r][c] = false;
     }
@@ -437,7 +465,7 @@ function revealAnswer() {
       mistakeGrid[r][c] = false;
     }
   }
-  
+
   gameWon = true;
 }
 
@@ -471,31 +499,31 @@ function newPuzzle() {
 function mousePressed() {
   // Restart Button Click
   if (mouseX > restartX &&
-      mouseX < restartX + restartW &&
-      mouseY > restartY &&
-      mouseY < restartY + restartH) {
-        restartGame();
-        return;
-      }
+    mouseX < restartX + restartW &&
+    mouseY > restartY &&
+    mouseY < restartY + restartH) {
+    restartGame();
+    return;
+  }
 
   // Reveal Answer Button Click
   if (mouseX > revealX &&
-      mouseX < revealX + revealW &&
-      mouseY > revealY &&
-      mouseY < revealY + revealH) {
-        revealAnswer();
-        return;
-      }
-  
+    mouseX < revealX + revealW &&
+    mouseY > revealY &&
+    mouseY < revealY + revealH) {
+    revealAnswer();
+    return;
+  }
+
 
   // New Puzzle Button Click
   if (mouseX > newX &&
-      mouseX < newX + newW &&
-      mouseY > newY &&
-      mouseY < newY + newH) {
-        newPuzzle();
-        return;
-      }
+    mouseX < newX + newW &&
+    mouseY > newY &&
+    mouseY < newY + newH) {
+    newPuzzle();
+    return;
+  }
 
   // Grid Position and Size
   let cellSize = 85;
@@ -516,7 +544,7 @@ function mousePressed() {
     }
     // Store the new selected cell
     selectedCol = newCol;
-    selectedRow = newRow
+    selectedRow = newRow;
   }
 }
 
