@@ -76,6 +76,43 @@ class SudokuBoard {
       }
     }
   }
+
+  isCorrectCell(row, col) {
+    return this.currentGrid[row][col] === this.solutionGrid[row][col];
+
+  }
+
+  checkWin() {
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        if (this.currentGrid[r][c] === 0) {
+          return false;
+        }
+        if (this.currentGrid[r][c] !== this.solutionGrid[r][c]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  updateMistakes() {
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        let value = this.currentGrid[r][c];
+
+        if (value === 0 || this.fixedGrid[r][c] !== 0) {
+          this.mistakeGrid[r][c] === false; continue;
+        }
+        if (!this.isCorrectCell(r, c)) {
+          this.mistakeGrid[r][c] = true;
+        }
+        else {
+          this.mistakeGrid[r][c] = false;
+        }
+      }
+    }
+  }
 }
 
 
@@ -217,7 +254,7 @@ function draw() {
 
   noStroke();
   fill(0);
-  textSize(22);
+  textSize(24);
   textAlign(CENTER, CENTER);
   text("REVEAL ANSWER", revealX + revealW / 2, revealY + revealH / 2);
 
@@ -232,7 +269,7 @@ function draw() {
 
   noStroke();
   fill(0);
-  textSize(22);
+  textSize(24);
   textAlign(CENTER, CENTER);
   text("NEW PUZZLE", newX + newW / 2, newY + newH / 2);
   textAlign(LEFT, CENTER);
