@@ -25,32 +25,56 @@ let restartX, restartY, restartW, restartH;
 let startGrid;
 let revealX, revealY, revealW, revealH;
 let newX, newY, newW, newH;
+let board;
 
 
 class SudokuBoard {
   constructor(puzzles, solutions) {
     this.puzzles = puzzles;
     this.solutions = solutions;
+    this.loadRandomPuzzle();
+  }
 
-    this.selectedRow = -1;
-    this.selectedCol = -1;
-    this.cellLocked = false;
-    this.mistakeCount = 0;
-    this.gameWon = false;
+  loadRandomPuzzle() {
+    let index = floor(random(this.puzzles.length));
+    this.chosenPuzzle = this.puzzles[index];
+    this.chosenSolution = this.solutions[index];
 
-    this.restartX = 0;
-    this.restartY = 0;
-    this.restartW = 0;
-    this.restartH = 0;
-    this.revealX = 0;
-    this.revealY = 0;
-    this.revealW = 0;
-    this.revealH = 0;
-    this.newX = 0;
-    this.newY = 0;
-    this.newW = 0;
-    this.newH = 0;
-    
+    this.currentGrid = convertToGrid(this.chosenPuzzle);
+    this.solutionGrid = convertToGrid(this.chosenSolution);
+
+    this.fixedGrid = copyGrid(this.currentGrid);
+    this.startGrid = copyGrid(this.currentGrid);
+
+    this.mistakeGrid = [];
+    for (let r = 0; r < 9; r++) {
+      let rowArray = [];
+      for (let c = 0; c < 9; c++) {
+        rowArray.push(false);
+      }
+      this.mistakeGrid.push(rowArray);
+    }
+  }
+
+  restartCurrentPuzzle() {
+    this.currentGrid = copyGrid(this.startGrid);
+    this.fixedGrid = copyGrid(this.startGrid);
+
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        this.mistakeGrid[r][c] = false;
+      }
+    }
+  }
+
+  revealAnswer() {
+    this.currentGrid = copyGrid(this.solutionGrid);
+
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        this.mistakeGrid[r][c] = false;
+      }
+    }
   }
 }
 
@@ -97,30 +121,8 @@ function setup() {
     }
   }
 
-  // Initialize mistakes grid
-  mistakeGrid = [];
-  for (let r = 0; r < 9; r++) {
-    let rowArray = [];
-    for (let c = 0; c < 9; c++) {
-      rowArray.push(false);  // No mistakes at the start
-    }
-    mistakeGrid.push(rowArray);
-  }
-
-  // Select a Random Puzzle from the text file
-  let index = floor(random(puzzles.length));
-  chosenPuzzle = puzzles[index];
-  chosenSolution = solutions[index];
-
-  // Convert the puzzle numbers into the 9x9 Grid
-  currentGrid = convertToGrid(chosenPuzzle);
-  solutionGrid = convertToGrid(chosenSolution);
-
-  // Copy original grid so the helper numbers are fixed
-  fixedGrid = copyGrid(currentGrid);
-  // console.log("SOLUTION GRID: ");
-  // console.table(solutionGrid);
-  startGrid = copyGrid(currentGrid);      // Save original puzzle for restart
+  board = new SudokuBoard(puzzles, solutions);
+  copyBoardToGame();
 }
 
 
@@ -433,65 +435,50 @@ function copyGrid(grid) {
 }
 
 
+function copyBoardToGame() {
+  currentGrid = board.currentGrid;
+  solutionGrid = board.solutionGrid;
+  fixedGrid = board.fixedGrid;
+  startGrid = board.startGrid;
+  mistakeGrid = board.mistakeGrid;
+}
+
 // Restart Current Puzzle
 function restartGame() {
-  currentGrid = copyGrid(startGrid);    // reset puzzle
-  fixedGrid = copyGrid(startGrid);      // reset helper numbers
+  board.restartCurrentPuzzle();
+  copyBoardToGame();
+
   mistakeCount = 0;
   gameWon = false;
   cellLocked = false;
   selectedRow = -1;
   selectedCol = -1;
-
-  // Clear mistake highlights
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      mistakeGrid[r][c] = false;
-    }
-  }
 }
 
 
 // Reveal Full Solution On The Board
 function revealAnswer() {
-  currentGrid = copyGrid(solutionGrid);     // Show the solution
+  board.revealAnswer();
+  copyBoardToGame();
+
   cellLocked = true;
   selectedRow = -1;
   selectedCol = -1;
-
-  // Clear Mistake Highlights
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      mistakeGrid[r][c] = false;
-    }
-  }
-
+  mistakeCount = 0;
   gameWon = true;
 }
 
 
 // Load a New Puzzle on the Grid
 function newPuzzle() {
-  let index = floor(random(puzzles.length));      // Pick a new random puzzle index
-  chosenPuzzle = puzzles[index];
-  chosenSolution = solutions[index];
-
-  currentGrid = convertToGrid(chosenPuzzle);      // Remake grids
-  solutionGrid = convertToGrid(chosenSolution);
-  fixedGrid = copyGrid(currentGrid);
-  startGrid = copyGrid(currentGrid);
+  board.loadRandomPuzzle();
+  copyBoardToGame();
 
   mistakeCount = 0;     // Reset Game State
   gameWon = false;
   cellLocked = false;
   selectedRow = -1;
   selectedCol = -1;
-
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      mistakeGrid[r][c] = false;
-    }
-  }
 }
 
 
