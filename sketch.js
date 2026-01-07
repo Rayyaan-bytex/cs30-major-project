@@ -367,26 +367,10 @@ function draw() {
 
 // Recheck Entire Board After Every Move
 function updateMistakes() {
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      let value = currentGrid[r][c];      // Store the number currently in this cell
-
-      if (value === 0 || fixedGrid[r][c] !== 0) {     // Only check cells that aren't empty and helper numbers
-        mistakeGrid[r][c] = false;      // Ignores empty cells and original helper numbers
-        continue;
-      }
-      if (!isCorrectCell(r, c)) {
-        if (!mistakeGrid[r][c]) {
-          mistakeCount++;
-        }
-        mistakeGrid[r][c] = true;
-      }
-      else {
-        mistakeGrid[r][c] = false;
-      }
-    }
-  }
-  if (checkWin()) {
+  board.updateMistakes();
+  copyBoardToGame();
+  
+  if (board.checkWin()) {
     gameWon = true;
     selectedRow = -1;
     selectedCol = -1;
