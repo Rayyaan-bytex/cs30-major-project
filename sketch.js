@@ -19,7 +19,6 @@ let selectedCol = -1;
 let fixedGrid;
 let mistakeGrid;
 let cellLocked = false;
-let mistakeCount = 0;
 let gameWon = false;
 let restartX, restartY, restartW, restartH;
 let startGrid;
@@ -32,6 +31,7 @@ class SudokuBoard {
   constructor(puzzles, solutions) {
     this.puzzles = puzzles;
     this.solutions = solutions;
+    this.mistakeCount = 0;
     this.loadRandomPuzzle();
   }
 
@@ -54,6 +54,7 @@ class SudokuBoard {
       }
       this.mistakeGrid.push(rowArray);
     }
+    this.mistakeCount = 0;
   }
 
   restartCurrentPuzzle() {
@@ -65,6 +66,7 @@ class SudokuBoard {
         this.mistakeGrid[r][c] = false;
       }
     }
+    this.mistakeCount = 0;
   }
 
   revealAnswer() {
@@ -75,6 +77,7 @@ class SudokuBoard {
         this.mistakeGrid[r][c] = false;
       }
     }
+    this.mistakeCount = 0;
   }
 
   isCorrectCell(row, col) {
@@ -97,15 +100,18 @@ class SudokuBoard {
   }
 
   updateMistakes() {
+    this.mistakeCount = 0;
+
     for (let r = 0; r < 9; r++) {
       for (let c = 0; c < 9; c++) {
         let value = this.currentGrid[r][c];
 
         if (value === 0 || this.fixedGrid[r][c] !== 0) {
-          this.mistakeGrid[r][c] === false; continue;
+          this.mistakeGrid[r][c] = false; continue;
         }
         if (!this.isCorrectCell(r, c)) {
           this.mistakeGrid[r][c] = true;
+          this.mistakeCount++;
         }
         else {
           this.mistakeGrid[r][c] = false;
@@ -225,7 +231,7 @@ function draw() {
   textSize(40);
   fill(0);
   textAlign(LEFT, CENTER);
-  text("Mistakes: " + mistakeCount, barX - 25, topBarY + restartH / 2);
+  text("Mistakes: " + board.mistakeCount, barX - 25, topBarY + restartH / 2);
 
   let mistakesTextW = textWidth("Mistakes: ");
 
@@ -469,7 +475,6 @@ function restartGame() {
   board.restartCurrentPuzzle();
   copyBoardToGame();
 
-  mistakeCount = 0;
   gameWon = false;
   cellLocked = false;
   selectedRow = -1;
@@ -485,7 +490,6 @@ function revealAnswer() {
   cellLocked = true;
   selectedRow = -1;
   selectedCol = -1;
-  mistakeCount = 0;
   gameWon = true;
 }
 
@@ -495,7 +499,6 @@ function newPuzzle() {
   board.loadRandomPuzzle();
   copyBoardToGame();
 
-  mistakeCount = 0;     // Reset Game State
   gameWon = false;
   cellLocked = false;
   selectedRow = -1;
