@@ -6,6 +6,7 @@
 - Each column, row, and a 3 x 3 subgrid contains each number from 1 to 9 exactly once
 - <!-- https://www.websudoku.com/ -->
 - <!--https://projecteuler.net/resources/documents/0096_sudoku.txt-->
+- <!--https://sudoku.com/-->
 
 ## Needs To Have
 

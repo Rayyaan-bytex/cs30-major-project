@@ -289,6 +289,21 @@ function draw() {
     }
   }
 
+  // Highlighting Row, Col, Box, and all Instances of Same Number
+  if (selectedRow !== -1 && selectedCol !== -1) {
+    let boxRow = floor(selectedRow / 3) * 3;
+    let boxCol = floor(selectedCol / 3) * 3;
+    noStroke();     // Highlight the 3x3 Box
+    fill(255, 255, 255, 35);
+    rect(gridX + boxCol * cellSize, gridY + boxRow * cellSize, cellSize * 3, cellSize * 3);   
+
+    // Highlight the Selected Row
+    fill(255, 255, 255, 25);
+    rect(gridX, gridY + selectedRow * cellSize, gridSize, cellSize);   
+    
+    
+  }
+
 
   // Highlight Selected Cell
   if (selectedRow !== -1 && selectedCol !== -1) {
