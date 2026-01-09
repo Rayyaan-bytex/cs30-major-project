@@ -25,6 +25,8 @@ let startGrid;
 let revealX, revealY, revealW, revealH;
 let newX, newY, newW, newH;
 let board;
+let easyX, easyY, easyW, easyH;
+let hardX, hardY, hardW, hardH;
 
 
 class SudokuBoard {
@@ -32,6 +34,7 @@ class SudokuBoard {
     this.puzzles = puzzles;
     this.solutions = solutions;
     this.mistakeCount = 0;
+    this.difficulty = "hard";
     this.loadRandomPuzzle();
   }
 
@@ -57,6 +60,11 @@ class SudokuBoard {
     this.mistakeCount = 0;
   }
 
+  setDifficulty(level) {
+    this.difficulty = level; 
+    this.loadRandomPuzzle();
+  }
+
   restartCurrentPuzzle() {
     this.currentGrid = copyGrid(this.startGrid);
     this.fixedGrid = copyGrid(this.startGrid);
@@ -66,8 +74,7 @@ class SudokuBoard {
         this.mistakeGrid[r][c] = false;
       }
     }
-    this.mistakeCount = 0;
-  }
+   }
 
   revealAnswer() {
     this.currentGrid = copyGrid(this.solutionGrid);
@@ -100,8 +107,6 @@ class SudokuBoard {
   }
 
   updateMistakes() {
-    this.mistakeCount = 0;
-
     for (let r = 0; r < 9; r++) {
       for (let c = 0; c < 9; c++) {
         let value = this.currentGrid[r][c];
@@ -110,8 +115,10 @@ class SudokuBoard {
           this.mistakeGrid[r][c] = false; continue;
         }
         if (!this.isCorrectCell(r, c)) {
+          if (!this.mistakeGrid[r][c]) {
+            this.mistakeCount++;
+          }
           this.mistakeGrid[r][c] = true;
-          this.mistakeCount++;
         }
         else {
           this.mistakeGrid[r][c] = false;
@@ -191,6 +198,48 @@ function draw() {
 
   textSize(30);
   text("DIFFICULTY LEVELS", width / 2 - 900, height / 2 - 80);
+
+  easyW = 170;
+  easyH = 55;
+  easyX = width / 2 - 900;
+  easyY = height / 2 - 30;
+
+  hardW = 170;
+  hardH = 55;
+  hardX = easyX + easyW + 25;
+  hardY = easyY;
+
+  // Easy Button
+  stroke(0);
+  strokeWeight(2);
+  fill(255);
+  rect(easyX, easyY, easyW, easyH, 10);
+
+  noStroke();
+  fill(0);
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text("EASY", easyX + easyW / 2, easyY + easyH / 2);
+  
+  // Hard Button
+  stroke(0);
+  strokeWeight(2);
+  fill(255);
+  rect(hardX, hardY, hardW, hardH, 10);
+
+  noStroke();
+  fill(0);
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text("HARD", hardX + hardW / 2, hardY + hardH / 2);
+  
+  // Shows which one is Selected (small text)
+  noStroke();
+  fill(0);
+  textSize(18);
+  textAlign(LEFT, CENTER);
+  text("Selected: ", board.difficulty, easyX, easyY + easyH + 30);
+  textAlign(LEFT, CENTER);
 
   textSize(30);
   text("TIPS FOR SOLVING", width / 2 - 900, height / 2 + 60);
@@ -301,7 +350,25 @@ function draw() {
     fill(255, 255, 255, 25);
     rect(gridX, gridY + selectedRow * cellSize, gridSize, cellSize);   
     
-    
+    // Highlight the Selected Col
+    fill(255, 255, 255, 25);
+    rect(gridX + selectedCol * cellSize, gridY, cellSize, gridSize);   
+
+    // Highlight Every Instance of Selected Number
+    let selectedValue = currentGrid[selectedRow][selectedCol];
+    if (selectedValue !== 0) {
+      fill(255, 255, 0 , 80 );
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          if (currentGrid[r][c] === selectedValue) {
+            rect(gridX + c * cellSize, gridY + r * cellSize, cellSize, cellSize);
+          }
+        }
+      }
+    }
+    // Darker Highlight for Selected Cell on TOp
+    fill(255, 255, 0, 110);
+    rect(gridX + selectedCol * cellSize, gridY + selectedRow * cellSize, cellSize, cellSize);
   }
 
 
