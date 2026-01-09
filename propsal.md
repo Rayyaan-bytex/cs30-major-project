@@ -31,4 +31,3 @@
 
 ## Taking it to the Next Level
 - A System that examines the puzzle and suggests logical moves
-

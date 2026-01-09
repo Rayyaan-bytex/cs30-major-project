@@ -6,10 +6,13 @@
 // - describe what you did to take this project "above and beyond"
 
 
-let puzzleLines;
-let solutionLines;
+let easyPuzzleLines, easySolutionLines;
+let puzzleLines, solutionLines;
 let puzzles = [];
 let solutions = [];
+let easyPuzzles = [];
+let easySolutions = [];
+let difficulty = "HARD";
 let chosenPuzzle;
 let chosenSolution = [];
 let currentGrid;
@@ -74,7 +77,7 @@ class SudokuBoard {
         this.mistakeGrid[r][c] = false;
       }
     }
-   }
+  }
 
   revealAnswer() {
     this.currentGrid = copyGrid(this.solutionGrid);
@@ -126,6 +129,11 @@ class SudokuBoard {
       }
     }
   }
+  setPuzzle(newPuzzles, newSolutions) {
+    this.puzzles = newPuzzles;
+    this.solutions = newSolutions;
+    this.loadRandomPuzzle();
+  }
 }
 
 
@@ -133,12 +141,17 @@ class SudokuBoard {
 function preload() {
   puzzleLines = loadStrings("puzzles_hard.txt");
   solutionLines = loadStrings("solutions_hard.txt");
+  easyPuzzleLines = loadStrings("puzzles_easy.txt");
+  easySolutionLines = loadStrings("solutions_easy.txt");
 }
 
 
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  easyPuzzles = readGrid(easyPuzzleLines);
+  easySolutions = readGrid(easySolutionLines);
 
   // Extracts the text file into puzzles
 
@@ -176,6 +189,24 @@ function setup() {
 }
 
 
+// Turns the file lines into an array of 9 line grids
+function readGrid(lines) {
+  let all = [];
+  let temp = [];
+
+  for (let line of lines) {
+    if (line[0] === "G") 
+      continue;
+    temp.push(line);
+
+    if (temp.length === 9) {
+      all.push(temp.concat());
+      temp = [];
+    }
+  }
+  return all;
+}
+
 function draw() {
   background("#e09db9ff");
   textAlign(LEFT, CENTER);
@@ -198,6 +229,12 @@ function draw() {
 
   textSize(30);
   text("DIFFICULTY LEVELS", width / 2 - 900, height / 2 - 80);
+
+  // Shows which one is Selected (small text)
+  textSize(18);
+  fill(0);
+  textAlign(LEFT, CENTER);
+  text("Selected: ", difficulty, width / 2 - 900, height / 2 - 30);
 
   easyW = 170;
   easyH = 55;
@@ -232,14 +269,6 @@ function draw() {
   textSize(24);
   textAlign(CENTER, CENTER);
   text("HARD", hardX + hardW / 2, hardY + hardH / 2);
-  
-  // Shows which one is Selected (small text)
-  noStroke();
-  fill(0);
-  textSize(18);
-  textAlign(LEFT, CENTER);
-  text("Selected: ", board.difficulty, easyX, easyY + easyH + 30);
-  textAlign(LEFT, CENTER);
 
   textSize(30);
   text("TIPS FOR SOLVING", width / 2 - 900, height / 2 + 60);
@@ -638,6 +667,40 @@ function mousePressed() {
     // Store the new selected cell
     selectedCol = newCol;
     selectedRow = newRow;
+  }
+
+  // Easy Button Click
+  if (mouseX >= easyX &&
+    mouseX < easyX + easyW &&
+    mouseY >= easyY &&
+    mouseY < easyY + easyH) {
+
+    difficulty = "EASY";
+    board.setPuzzle(easyPuzzles, easySolutions);
+    copyBoardToGame();
+
+    gameWon = false;
+    selectedRow = -1;
+    selectedCol = -1;
+    cellLocked = false;
+    return;
+  }
+
+  // Hard Button Click
+  if (mouseX >= hardX &&
+    mouseX < hardX + hardW &&
+    mouseY >= hardY &&
+    mouseY < hardY + hardH) {
+
+    difficulty = "HARD";
+    board.setPuzzle(puzzles, solutions);
+    copyBoardToGame();
+
+    gameWon = false;
+    selectedRow = -1;
+    selectedCol = -1;
+    cellLocked = false;
+    return;
   }
 }
 
