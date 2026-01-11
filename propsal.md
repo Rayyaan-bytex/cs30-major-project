@@ -28,6 +28,8 @@
 - Let user reveal the answer for the selected level
 - Adding a Timer for difficulty (Counter)
 - Atleast 2 difficulty levels
+- Limited Mistakes in Hard Mode
+- Undo Button for Last Move
 
 ## Taking it to the Next Level
 - A System that examines the puzzle and suggests logical moves
