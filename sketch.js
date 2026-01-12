@@ -33,6 +33,9 @@ let easyX, easyY, easyW, easyH;
 let hardX, hardY, hardW, hardH;
 let undoX, undoY, undoW, undoH;
 let lastMove = null;
+let hardTimeLimit = 800;
+let timeStart = 0;
+let timeLeft = hardTimeLimit;
 
 
 class SudokuBoard {
@@ -67,7 +70,7 @@ class SudokuBoard {
   }
 
   setDifficulty(level) {
-    this.difficulty = level; 
+    this.difficulty = level;
     this.loadRandomPuzzle();
   }
 
@@ -189,7 +192,7 @@ function setup() {
 
   board = new SudokuBoard(puzzles, solutions);
   copyBoardToGame();
-  
+
   lastMove = null;
   gameOver = false;
   gameWon = false;
@@ -202,7 +205,7 @@ function readGrid(lines) {
   let temp = [];
 
   for (let line of lines) {
-    if (line[0] === "G") 
+    if (line[0] === "G")
       continue;
     temp.push(line);
 
@@ -224,7 +227,7 @@ function draw() {
   strokeWeight(1);
   noStroke();
 
-  let leftW = 380
+  let leftW = 380;
   let gap = 45;
 
   textSize(100);
@@ -267,7 +270,7 @@ function draw() {
   textSize(24);
   textAlign(CENTER, CENTER);
   text("EASY", easyX + easyW / 2, easyY + easyH / 2);
-  
+
   // Hard Button
   stroke(0);
   strokeWeight(2);
@@ -316,7 +319,7 @@ function draw() {
   newH = restartH;
 
   let topGap = 18;
-  
+
   if (undoW === undefined) {
     undoW = 160;
   }
@@ -331,7 +334,7 @@ function draw() {
   }
 
   let mistakesW = textWidth(mistakesTop);
-  let totalButtonsW = restartW + revealW + newW + undoW + (topGap * 3);
+  let totalButtonsW = restartW + revealW + newW + undoW + topGap * 3;
   let totalBarW = mistakesW + 30 + totalButtonsW;
   let barX = gridX + (gridSize - totalBarW) / 2;
 
@@ -416,20 +419,20 @@ function draw() {
     let boxCol = floor(selectedCol / 3) * 3;
     noStroke();     // Highlight the 3x3 Box
     fill(255, 255, 255, 35);
-    rect(gridX + boxCol * cellSize, gridY + boxRow * cellSize, cellSize * 3, cellSize * 3);   
+    rect(gridX + boxCol * cellSize, gridY + boxRow * cellSize, cellSize * 3, cellSize * 3);
 
     // Highlight the Selected Row
     fill(255, 255, 255, 25);
-    rect(gridX, gridY + selectedRow * cellSize, gridSize, cellSize);   
-    
+    rect(gridX, gridY + selectedRow * cellSize, gridSize, cellSize);
+
     // Highlight the Selected Col
     fill(255, 255, 255, 25);
-    rect(gridX + selectedCol * cellSize, gridY, cellSize, gridSize);   
+    rect(gridX + selectedCol * cellSize, gridY, cellSize, gridSize);
 
     // Highlight Every Instance of Selected Number
     let selectedValue = currentGrid[selectedRow][selectedCol];
     if (selectedValue !== 0) {
-      fill(255, 255, 0 , 80 );
+      fill(255, 255, 0, 80);
       for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
           if (currentGrid[r][c] === selectedValue) {
@@ -544,7 +547,7 @@ function updateMistakes() {
     selectedCol = -1;
     return;
   }
-  
+
   if (board.checkWin()) {
     gameWon = true;
     selectedRow = -1;
@@ -716,23 +719,23 @@ function mousePressed() {
     mouseX < undoX + undoW &&
     mouseY > undoY &&
     mouseY < undoY + undoH) {
-      if (lastMove !== null) {
-        currentGrid[lastMove.row][lastMove.col] = lastMove.prevValue;
+    if (lastMove !== null) {
+      currentGrid[lastMove.row][lastMove.col] = lastMove.prevValue;
 
-        selectedRow = lastMove.row;
-        selectedCol = lastMove.col;
-        cellLocked = false;
-        
-        board.updateMistakes();
-        copyBoardToGame();
+      selectedRow = lastMove.row;
+      selectedCol = lastMove.col;
+      cellLocked = false;
 
-        gameWon = board.checkWin();
-        if (!gameWon) {
+      board.updateMistakes();
+      copyBoardToGame();
 
-        }
-        lastMove = null;
+      gameWon = board.checkWin();
+      if (!gameWon) {
+
       }
-      return;
+      lastMove = null;
+    }
+    return;
   }
 
   // Grid Position and Size
@@ -802,7 +805,7 @@ function keyPressed() {
   if (gameWon || gameOver) {
     return;
   }
-  
+
   if (selectedRow === -1 || selectedCol === -1) {     // If no cell is selected, do nothing
     return;
   }
