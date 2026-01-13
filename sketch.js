@@ -33,7 +33,7 @@ let easyX, easyY, easyW, easyH;
 let hardX, hardY, hardW, hardH;
 let undoX, undoY, undoW, undoH;
 let lastMove = null;
-let hardTimeLimit = 800;
+let hardTimeLimit = 600;
 let timeStart = 0;
 let timeLeft = hardTimeLimit;
 
@@ -193,6 +193,8 @@ function setup() {
   board = new SudokuBoard(puzzles, solutions);
   copyBoardToGame();
 
+  timeStart = millis();
+  timeLeft = hardTimeLimit;
   lastMove = null;
   gameOver = false;
   gameWon = false;
@@ -219,6 +221,19 @@ function readGrid(lines) {
 
 function draw() {
   background("#e09db9ff");
+  
+  if (!gameWon && !gameOver && difficulty === "HARD") {
+    let passedSec = floor((millis() - timeStart) / 1000);
+    timeLeft = max(0, hardTimeLimit - passedSec);
+
+    if (timeLeft === 0) {
+      gameOver = true;
+      cellLocked = true;
+      selectedRow = -1;
+      selectedCol = -1;
+    }
+  }
+
   textAlign(LEFT, CENTER);
   fill("#2e351dff");
   textFont("Montserrat");
@@ -337,6 +352,14 @@ function draw() {
   let totalButtonsW = restartW + revealW + newW + undoW + topGap * 3;
   let totalBarW = mistakesW + 30 + totalButtonsW;
   let barX = gridX + (gridSize - totalBarW) / 2;
+
+  if (difficulty === "HARD") {
+    let mins = floor(timeLeft / 60);
+    let secs = timeLeft % 60;
+    let timeText = "Time: " + mins + ":" + nf(secs, 2);
+    text(timeText, barX - 200, topBarY + restartH / 2);
+  }
+
 
   text(mistakesTop, barX, topBarY + restartH / 2);
 
@@ -492,14 +515,14 @@ function draw() {
 
   if (gameWon) {
     textAlign(CENTER, CENTER);
-    textSize(75);
+    textSize(100);
     fill("#428475ff");
     text("YOU\nWIN!", lineX / 2 + 450, height / 2);
   }
 
   if (gameOver) {
     textAlign(CENTER, CENTER);
-    textSize(75);
+    textSize(95);
     fill(200, 0, 0);
     text("GAME\nOVER!", lineX / 2 + 450, height / 2);
   }
@@ -653,6 +676,8 @@ function restartGame() {
   selectedRow = -1;
   selectedCol = -1;
   lastMove = null;
+  timeStart = millis();
+  timeLeft = hardTimeLimit;
 }
 
 
@@ -667,6 +692,8 @@ function revealAnswer() {
   gameWon = true;
   gameOver = false;
   lastMove = null;
+  timeStart = millis();
+  timeLeft = hardTimeLimit;
 }
 
 
@@ -681,6 +708,8 @@ function newPuzzle() {
   selectedRow = -1;
   selectedCol = -1;
   lastMove = null;
+  timeStart = millis();
+  timeLeft = hardTimeLimit;
 }
 
 
