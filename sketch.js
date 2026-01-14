@@ -32,7 +32,7 @@ let board;
 let easyX, easyY, easyW, easyH;
 let hardX, hardY, hardW, hardH;
 let undoX, undoY, undoW, undoH;
-let lastMove = null;
+let moveHistory = [];
 let hardTimeLimit = 600;
 let timeStart = 0;
 let timeLeft = hardTimeLimit;
@@ -195,7 +195,7 @@ function setup() {
 
   timeStart = millis();
   timeLeft = hardTimeLimit;
-  lastMove = null;
+  moveHistory = [];
   gameOver = false;
   gameWon = false;
 }
@@ -221,7 +221,7 @@ function readGrid(lines) {
 
 function draw() {
   background("#e09db9ff");
-  
+
   if (!gameWon && !gameOver && difficulty === "HARD") {
     let passedSec = floor((millis() - timeStart) / 1000);
     timeLeft = max(0, hardTimeLimit - passedSec);
@@ -306,7 +306,7 @@ function draw() {
   textSize(23);
   text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n To make them easier to fill in.\n•Don't Guess, Use Logic:\
  Don't make a random guess.\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n Most frequently in the grid"
-  , width / 2 - 900, 760);
+    , width / 2 - 900, 760);
 
   // Dividing Line
 
@@ -675,7 +675,7 @@ function restartGame() {
   cellLocked = false;
   selectedRow = -1;
   selectedCol = -1;
-  lastMove = null;
+  moveHistory = [];
   timeStart = millis();
   timeLeft = hardTimeLimit;
 }
@@ -691,7 +691,7 @@ function revealAnswer() {
   selectedCol = -1;
   gameWon = true;
   gameOver = false;
-  lastMove = null;
+  moveHistory = [];
   timeStart = millis();
   timeLeft = hardTimeLimit;
 }
@@ -707,7 +707,7 @@ function newPuzzle() {
   cellLocked = false;
   selectedRow = -1;
   selectedCol = -1;
-  lastMove = null;
+  moveHistory = [];
   timeStart = millis();
   timeLeft = hardTimeLimit;
 }
@@ -748,21 +748,30 @@ function mousePressed() {
     mouseX < undoX + undoW &&
     mouseY > undoY &&
     mouseY < undoY + undoH) {
-    if (lastMove !== null) {
-      currentGrid[lastMove.row][lastMove.col] = lastMove.prevValue;
 
-      selectedRow = lastMove.row;
-      selectedCol = lastMove.col;
+    if (gameWon || gameOver) {
+      return;
+    }
+
+    if (moveHistory.length > 0) {
+      let move = moveHistory.pop();
+
+      currentGrid[move.row][move.col] = move.prevValue;
+
+      selectedRow = move.row;
+      selectedCol = move.col;
       cellLocked = false;
 
       board.updateMistakes();
       copyBoardToGame();
 
       gameWon = board.checkWin();
-      if (!gameWon) {
 
+      if (difficulty === "HARD" && board.mistakeCount >= 3) {
+        gameOver = true;
+      } else {
+        gameOver = false;
       }
-      lastMove = null;
     }
     return;
   }
@@ -804,7 +813,9 @@ function mousePressed() {
     selectedRow = -1;
     selectedCol = -1;
     cellLocked = false;
-    lastMove = null;
+    moveHistory = [];
+    timeStart = millis();
+    timeLeft = hardTimeLimit;
     return;
   }
 
@@ -823,10 +834,13 @@ function mousePressed() {
     selectedRow = -1;
     selectedCol = -1;
     cellLocked = false;
-    lastMove = null;
+    moveHistory = [];
+    timeStart = millis();
+    timeLeft = hardTimeLimit;
     return;
   }
 }
+
 
 
 // Let User Enter and Delete Numbers (Not the Helper Numbers)
@@ -853,12 +867,12 @@ function keyPressed() {
     let newVal = int(key);
 
     if (newVal !== prev) {
-      lastMove = {
+      moveHistory.push({
         row: selectedRow,
         col: selectedCol,
         prevValue: prev,
         newValue: newVal
-      };
+      });
     }
 
     currentGrid[selectedRow][selectedCol] = newVal;
@@ -868,12 +882,12 @@ function keyPressed() {
 
   if (keyCode === BACKSPACE || keyCode === DELETE) {      // If user presses backspace or delete
     if (prev !== 0) {
-      lastMove = {
+      moveHistory.push({
         row: selectedRow,
         col: selectedCol,
         prevValue: prev,
         newValue: 0
-      };
+      });
     }
     currentGrid[selectedRow][selectedCol] = 0;      // Clear the selected cell
     cellLocked = false;     // unlock cell after removing number
