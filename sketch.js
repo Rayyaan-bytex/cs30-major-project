@@ -140,7 +140,7 @@ class SudokuBoard {
     this.solutions = newSolutions;
     this.loadRandomPuzzle();
   }
-}
+} 
 
 
 // Loads the text file containing 10 sudoku puzzles 
@@ -306,7 +306,7 @@ function draw() {
   textSize(23);
   text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n To make them easier to fill in.\n•Don't Guess, Use Logic:\
  Don't make a random guess.\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n Most frequently in the grid"
-    , width / 2 - 900, 760);
+  , width / 2 - 900, 760);
 
   // Dividing Line
 
@@ -769,7 +769,8 @@ function mousePressed() {
 
       if (difficulty === "HARD" && board.mistakeCount >= 3) {
         gameOver = true;
-      } else {
+      } 
+      else {
         gameOver = false;
       }
     }
