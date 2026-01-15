@@ -24,7 +24,7 @@ let mistakeGrid;
 let cellLocked = false;
 let gameWon = false;
 let gameOver = false;
-let restartX, restartY, restartW, restartH;
+let clearX, clearY, clearW, clearH;
 let startGrid;
 let revealX, revealY, revealW, revealH;
 let newX, newY, newW, newH;
@@ -74,7 +74,7 @@ class SudokuBoard {
     this.loadRandomPuzzle();
   }
 
-  restartCurrentPuzzle() {
+  clearCurrentPuzzle() {
     this.currentGrid = copyGrid(this.startGrid);
     this.fixedGrid = copyGrid(this.startGrid);
 
@@ -83,19 +83,19 @@ class SudokuBoard {
         this.mistakeGrid[r][c] = false;
       }
     }
-    this.mistakeCount = 0;
   }
 
   revealAnswer() {
-    this.currentGrid = copyGrid(this.solutionGrid);
+    this.currentGrid = copyGrid(this.solutionGrid);     // Deletes the player's current progress and replaces it with a copy of the answer key.
 
     for (let r = 0; r < 9; r++) {
       for (let c = 0; c < 9; c++) {
-        this.mistakeGrid[r][c] = false;
+        this.mistakeGrid[r][c] = false;     // Clears all red mistakes
       }
     }
   }
-
+  
+  // Checks if cell's value matches the solution from the file
   isCorrectCell(row, col) {
     return this.currentGrid[row][col] === this.solutionGrid[row][col];
 
@@ -118,23 +118,24 @@ class SudokuBoard {
   updateMistakes() {
     for (let r = 0; r < 9; r++) {
       for (let c = 0; c < 9; c++) {
-        let value = this.currentGrid[r][c];
+        let value = this.currentGrid[r][c];     // Stores the number currently in this cell
 
-        if (value === 0 || this.fixedGrid[r][c] !== 0) {
-          this.mistakeGrid[r][c] = false; continue;
+        if (value === 0 || this.fixedGrid[r][c] !== 0) {      // If cell is empty or same as original puzzle
+          this.mistakeGrid[r][c] = false; continue;     // Skip to the next cell
         }
-        if (!this.isCorrectCell(r, c)) {
-          if (!this.mistakeGrid[r][c]) {
-            this.mistakeCount++;
+        if (!this.isCorrectCell(r, c)) {      // If User's number doesn't match the solution
+          if (!this.mistakeGrid[r][c]) {    // Error not counted yet
+            this.mistakeCount++;      // Add 1 to players total mistakes
           }
-          this.mistakeGrid[r][c] = true;
+          this.mistakeGrid[r][c] = true;      // Turns this cell red
         }
         else {
-          this.mistakeGrid[r][c] = false;
+          this.mistakeGrid[r][c] = false;     // Keeps it the same color (black)
         }
       }
     }
   }
+
   setPuzzle(newPuzzles, newSolutions) {
     this.puzzles = newPuzzles;
     this.solutions = newSolutions;
@@ -164,24 +165,23 @@ function setup() {
   let tempPuzzle = [];        // Holds one puzzle
   let tempSolution = [];
 
-  // - - - READ PUZZLES - - - Loop through all lines loaded from the file 
+  // READ PUZZLES - Loop through all lines loaded from the file 
   for (let line of puzzleLines) {
 
     // Skip lines like 'Grid 01'"
-    if (line[0] === "G")
-      continue;
+    if (line[0] === "G") continue;
     tempPuzzle.push(line);        // Add the puzzle in temporary array
 
+    // If 9 Lines are added, Puzzle Complete
     if (tempPuzzle.length === 9) {
-      puzzles.push(tempPuzzle.concat());
-      tempPuzzle = [];
+      puzzles.push(tempPuzzle.concat());    // Saves the Puzzle to Puzzle List
+      tempPuzzle = [];      // Resets Array for Next Puzzle
     }
   }
 
   // - - - READ SOLUTIONS - - - 
   for (let line of solutionLines) {
-    if (line[0] === "G")
-      continue;
+    if (line[0] === "G") continue;
     tempSolution.push(line);
 
     if (tempSolution.length === 9) {
@@ -207,8 +207,7 @@ function readGrid(lines) {
   let temp = [];
 
   for (let line of lines) {
-    if (line[0] === "G")
-      continue;
+    if (line[0] === "G") continue;
     temp.push(line);
 
     if (temp.length === 9) {
@@ -266,8 +265,8 @@ function draw() {
 
   easyW = 170;
   easyH = 55;
-  easyX = width / 2 - 880;
-  easyY = 610;
+  easyX = width / 2 - 900;
+  easyY = 520;
 
   hardW = 170;
   hardH = 55;
@@ -301,11 +300,11 @@ function draw() {
   textAlign(LEFT, CENTER);
   fill("#2e351dff");
   textSize(45);
-  text("TIPS FOR SOLVING", width / 2 - 900, 620);
+  text("TIPS FOR SOLVING", width / 2 - 900, 630);
 
-  textSize(23);
+  textSize(22);
   text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n To make them easier to fill in.\n•Don't Guess, Use Logic:\
- Don't make a random guess.\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n Most frequently in the grid"
+ Don't make a random guess\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n Most frequently in the grid"
   , width / 2 - 900, 760);
 
   // Dividing Line
@@ -313,25 +312,26 @@ function draw() {
   stroke(0);
   strokeWeight(1);
   let lineX = width / 2 - 425;
+  let availableWidth = width - lineX;
   line(lineX, 0, lineX, height);
 
   // Draw Sudoku Grid
-
+  let buttonGap = 15;
+  let totalButtonsW = clearW + revealW + newW + undoW + (buttonGap * 3);
   let cellSize = 85;
   let gridSize = cellSize * 9;
   let gridX = width / 2 - 70;
   let gridY = height / 2 - 320;
-  let topBarX = -20;
-  let topBarY = gridY - 105;
-  let barGap = 20;
+  let topBarY = gridY - 80;
+  let startX = gridX + (gridSize - totalButtonsW) / 2;
 
   // Sizes
-  restartW = 210;
-  restartH = 65;
+  clearW = 210;
+  clearH = 65;
   revealW = 230;
-  revealH = restartH;
+  revealH = clearH;
   newW = 210;
-  newH = restartH;
+  newH = clearH;
 
   let topGap = 18;
 
@@ -342,43 +342,46 @@ function draw() {
   // Display Mistake Counter
   textSize(40);
   fill(0);
-  textAlign(LEFT, CENTER);
+  textAlign(RIGHT, TOP);
+  let bottomY = gridY + gridSize + 35;
+  let leftEdge = gridX;
+  let rightEdge = gridX + gridSize;
+  let cornerX = gridX + gridSize;
+  let cornerY = gridY + gridSize + 20;
   let mistakesTop = "Mistakes: " + board.mistakeCount;
   if (difficulty === "HARD") {
     mistakesTop += "/3";
   }
+  text(mistakesTop, cornerX + 235, cornerY - 150);
 
   let mistakesW = textWidth(mistakesTop);
-  let totalButtonsW = restartW + revealW + newW + undoW + topGap * 3;
   let totalBarW = mistakesW + 30 + totalButtonsW;
   let barX = gridX + (gridSize - totalBarW) / 2;
 
   if (difficulty === "HARD") {
+    textAlign(LEFT, TOP);
     let mins = floor(timeLeft / 60);
     let secs = timeLeft % 60;
     let timeText = "Time: " + mins + ":" + nf(secs, 2);
-    text(timeText, barX - 200, topBarY + restartH / 2);
+    text(timeText, cornerX + 20, cornerY - 95);
   }
 
-
-  text(mistakesTop, barX, topBarY + restartH / 2);
-
-  restartX = barX + mistakesW + 30;
-  restartY = topBarY;
+  clearX = startX;
+  clearY = topBarY;
 
   stroke(0);
   strokeWeight(2);
   fill(255);
-  rect(restartX, restartY, restartW, restartH, 10);
+  rect(clearX, clearY, clearW, clearH, 10);
 
   noStroke();
   fill(0);
   textSize(28);
   textAlign(CENTER, CENTER);
-  text("CLEAR", restartX + restartW / 2, restartY + restartH / 2);
+  text("CLEAR", clearX + clearW / 2, clearY + clearH / 2);
 
   // Draw Reveal Answers Button
-  revealX = restartX + restartW + topGap;
+  revealX = clearX + clearW + buttonGap;
   revealY = topBarY;
 
   stroke(0);
@@ -393,7 +396,7 @@ function draw() {
   text("REVEAL ANSWER", revealX + revealW / 2, revealY + revealH / 2);
 
   // New Puzzle Button
-  newX = revealX + revealW + topGap;
+  newX = revealX + revealW + buttonGap;
   newY = topBarY;
 
   stroke(0);
@@ -410,8 +413,8 @@ function draw() {
 
   // UNDO Button 
   undoW = 160;
-  undoH = restartH;
-  undoX = newX + newW + topGap;
+  undoH = clearH;
+  undoX = newX + newW + buttonGap;
   undoY = topBarY;
 
   stroke(0);
@@ -432,7 +435,7 @@ function draw() {
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
       fill("#8a8888ff");
-      rect(gridX + col * cellSize, gridY + row * cellSize, cellSize, cellSize);
+      rect(gridX + col * cellSize, gridY + row * cellSize, cellSize, cellSize);   // Calculate position based on grid starting point and cell index
     }
   }
 
@@ -506,7 +509,7 @@ function draw() {
     if (j % 3 === 0) {
       strokeWeight(3);
     }
-    else {
+    else {  
       strokeWeight(1);
     }
     let x = gridX + j * cellSize;
@@ -636,11 +639,11 @@ function convertToGrid(puzzle) {
   let grid = [];
 
   for (let i = 0; i < 9; i++) {
-    let rowArray = [];
+    let rowArray = [];        // Empty Array to represents a Single Row
     for (let j = 0; j < 9; j++) {
       rowArray.push(int(puzzle[i][j]));      // int converts the text like "5" to a number 5
     }
-    grid.push(rowArray);
+    grid.push(rowArray);      // Add Completed Row of Nums to Main Grid
   }
   return grid;
 }
@@ -665,9 +668,9 @@ function copyBoardToGame() {
   mistakeGrid = board.mistakeGrid;
 }
 
-// Restart Current Puzzle
-function restartGame() {
-  board.restartCurrentPuzzle();
+// clear Current Puzzle
+function clearGame() {
+  board.clearCurrentPuzzle();
   copyBoardToGame();
 
   gameWon = false;
@@ -715,12 +718,12 @@ function newPuzzle() {
 
 // Detects which Sudoku cell the user clicks and stores its row and column
 function mousePressed() {
-  // Restart Button Click
-  if (mouseX > restartX &&
-    mouseX < restartX + restartW &&
-    mouseY > restartY &&
-    mouseY < restartY + restartH) {
-    restartGame();
+  // clear Button Click
+  if (mouseX > clearX &&
+    mouseX < clearX + clearW &&
+    mouseY > clearY &&
+    mouseY < clearY + clearH) {
+    clearGame();
     return;
   }
 
@@ -854,7 +857,7 @@ function keyPressed() {
     return;
   }
 
-  if (fixedGrid[selectedRow][selectedCol] !== 0) {      // if the cell is a hellper number, do nothing
+  if (fixedGrid[selectedRow][selectedCol] !== 0) {      // if the cell is a helper number, do nothing
     return;
   }
 
