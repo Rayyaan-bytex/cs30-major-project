@@ -33,7 +33,7 @@ let easyX, easyY, easyW, easyH;
 let hardX, hardY, hardW, hardH;
 let undoX, undoY, undoW, undoH;
 let moveHistory = [];
-let hardTimeLimit = 600;
+let hardTimeLimit = 200;
 let timeStart = 0;
 let timeLeft = hardTimeLimit;
 
