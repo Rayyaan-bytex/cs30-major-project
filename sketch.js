@@ -241,8 +241,8 @@ function draw() {
   strokeWeight(1);
   noStroke();
 
-  let leftW = 380;
-  let gap = 45;
+  // let leftW = 380;
+  // let gap = 45;
 
   textSize(100);
   text("SUDOKU", width / 2 - 900, 140);
@@ -312,12 +312,12 @@ function draw() {
   stroke(0);
   strokeWeight(1);
   let lineX = width / 2 - 425;
-  let availableWidth = width - lineX;
+  // let availableWidth = width - lineX;
   line(lineX, 0, lineX, height);
 
   // Draw Sudoku Grid
   let buttonGap = 15;
-  let totalButtonsW = clearW + revealW + newW + undoW + (buttonGap * 3);
+  let totalButtonsW = clearW + revealW + newW + undoW + buttonGap * 3;
   let cellSize = 85;
   let gridSize = cellSize * 9;
   let gridX = width / 2 - 70;
@@ -333,7 +333,8 @@ function draw() {
   newW = 210;
   newH = clearH;
 
-  let topGap = 18;
+  // let topGap = 18;
+
 
   if (undoW === undefined) {
     undoW = 160;
@@ -343,9 +344,9 @@ function draw() {
   textSize(40);
   fill(0);
   textAlign(RIGHT, TOP);
-  let bottomY = gridY + gridSize + 35;
-  let leftEdge = gridX;
-  let rightEdge = gridX + gridSize;
+  // let bottomY = gridY + gridSize + 35;
+  // let leftEdge = gridX;
+  // let rightEdge = gridX + gridSize;
   let cornerX = gridX + gridSize;
   let cornerY = gridY + gridSize + 20;
   let mistakesTop = "Mistakes: " + board.mistakeCount;
@@ -356,7 +357,7 @@ function draw() {
 
   let mistakesW = textWidth(mistakesTop);
   let totalBarW = mistakesW + 30 + totalButtonsW;
-  let barX = gridX + (gridSize - totalBarW) / 2;
+  // let barX = gridX + (gridSize - totalBarW) / 2;
 
   if (difficulty === "HARD") {
     textAlign(LEFT, TOP);
