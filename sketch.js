@@ -33,7 +33,7 @@ let easyX, easyY, easyW, easyH;
 let hardX, hardY, hardW, hardH;
 let undoX, undoY, undoW, undoH;
 let moveHistory = [];
-let hardTimeLimit = 200;
+let hardTimeLimit = 600;
 let timeStart = 0;
 let timeLeft = hardTimeLimit;
 
@@ -169,7 +169,9 @@ function setup() {
   for (let line of puzzleLines) {
 
     // Skip lines like 'Grid 01'"
-    if (line[0] === "G") continue;
+    if (line[0] === "G") {
+      continue;
+    }
     tempPuzzle.push(line);        // Add the puzzle in temporary array
 
     // If 9 Lines are added, Puzzle Complete
@@ -181,7 +183,9 @@ function setup() {
 
   // - - - READ SOLUTIONS - - - 
   for (let line of solutionLines) {
-    if (line[0] === "G") continue;
+    if (line[0] === "G") {
+      continue;
+    }
     tempSolution.push(line);
 
     if (tempSolution.length === 9) {
@@ -198,6 +202,8 @@ function setup() {
   moveHistory = [];
   gameOver = false;
   gameWon = false;
+
+  resizeCanvas(windowWidth, windowHeight);  
 }
 
 
@@ -207,7 +213,9 @@ function readGrid(lines) {
   let temp = [];
 
   for (let line of lines) {
-    if (line[0] === "G") continue;
+    if (line[0] === "G") {
+      continue;
+    }
     temp.push(line);
 
     if (temp.length === 9) {
@@ -315,6 +323,14 @@ function draw() {
   // let availableWidth = width - lineX;
   line(lineX, 0, lineX, height);
 
+  // Sizes
+  clearW = 210;
+  clearH = 65;
+  revealW = 230;
+  revealH = clearH;
+  newW = 210;
+  newH = clearH;
+
   // Draw Sudoku Grid
   let buttonGap = 15;
   let totalButtonsW = clearW + revealW + newW + undoW + buttonGap * 3;
@@ -324,14 +340,6 @@ function draw() {
   let gridY = height / 2 - 320;
   let topBarY = gridY - 80;
   let startX = gridX + (gridSize - totalButtonsW) / 2;
-
-  // Sizes
-  clearW = 210;
-  clearH = 65;
-  revealW = 230;
-  revealH = clearH;
-  newW = 210;
-  newH = clearH;
 
   // let topGap = 18;
 
@@ -898,4 +906,10 @@ function keyPressed() {
     cellLocked = false;     // unlock cell after removing number
     updateMistakes();
   }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  selectedRow = -1;
+  selectedCol = -1;
 }
