@@ -6,46 +6,46 @@
 // - describe what you did to take this project "above and beyond"
 
 
-let easyPuzzleLines, easySolutionLines;
+let easyPuzzleLines, easySolutionLines; // Loads lines from the puzzle/solution text files
 let puzzleLines, solutionLines;
-let puzzles = [];
+let puzzles = [];                       // Stores all puzzles/solutions after parsing
 let solutions = [];
 let easyPuzzles = [];
 let easySolutions = [];
-let difficulty = "HARD";
-let chosenPuzzle;
-let chosenSolution = [];
-let currentGrid;
+let difficulty = "HARD";                // Which mode the player is in
+let chosenPuzzle;                       // The puzzle/solution chosen for this round
+let chosenSolution = []; 
+let currentGrid;                        // The grids the game uses   
 let solutionGrid;
-let selectedRow = -1;
-let selectedCol = -1;
 let fixedGrid;
 let mistakeGrid;
-let cellLocked = false;
+let startGrid;
+let selectedRow = -1;                   // Selected cell
+let selectedCol = -1;
+let cellLocked = false;                 // Basic flags
 let gameWon = false;
 let gameOver = false;
-let clearX, clearY, clearW, clearH;
-let startGrid;
+let clearX, clearY, clearW, clearH;     // Top buttons
 let revealX, revealY, revealW, revealH;
 let newX, newY, newW, newH;
-let board;
 let easyX, easyY, easyW, easyH;
-let hardX, hardY, hardW, hardH;
+let hardX, hardY, hardW, hardH;         // Difficulty buttons
 let undoX, undoY, undoW, undoH;
-let moveHistory = [];
-let hardTimeLimit = 600;
+let pauseX, pauseY, pauseW, pauseH;     // Pause button
+let board;                              // Main board 
+let moveHistory = [];                   // Stores player moves for Undo
+let hardTimeLimit = 600;                // Timer
 let timeStart = 0;
 let timeLeft = hardTimeLimit;
-let pauseX, pauseY, pauseW, pauseH;
-let isPaused = false;
+let isPaused = false;                   // Pause System
 let pausedTimeLeft = 0;
-let hardMistakeLimit = 5;
-let clickSound;
+let hardMistakeLimit = 5;               // Mistakes Limit
+let clickSound;                         // Sound Effects
 let correctSound;
 let mistakeSound;
 let victorySound;
 let defeatSound;
-let playedVictory = false;
+let playedVictory = false;              // Prevent repeating win/lose sounds
 let playedDefeat = false;
 
 
