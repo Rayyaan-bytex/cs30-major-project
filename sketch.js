@@ -83,6 +83,7 @@ class SudokuBoard {
         this.mistakeGrid[r][c] = false;
       }
     }
+    this.mistakeCount = 0;
   }
 
   revealAnswer() {
@@ -94,7 +95,7 @@ class SudokuBoard {
       }
     }
   }
-  
+
   // Checks if cell's value matches the solution from the file
   isCorrectCell(row, col) {
     return this.currentGrid[row][col] === this.solutionGrid[row][col];
@@ -141,7 +142,7 @@ class SudokuBoard {
     this.solutions = newSolutions;
     this.loadRandomPuzzle();
   }
-} 
+}
 
 
 // Loads the text file containing 10 sudoku puzzles 
@@ -203,7 +204,7 @@ function setup() {
   gameOver = false;
   gameWon = false;
 
-  resizeCanvas(windowWidth, windowHeight);  
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 
@@ -311,8 +312,8 @@ function draw() {
   text("TIPS FOR SOLVING", width / 2 - 900, 630);
 
   textSize(22);
-  text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n To make them easier to fill in.\n•Don't Guess, Use Logic:\
- Don't make a random guess\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n Most frequently in the grid"
+  text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n to make them easier to fill in.\n• Don't Guess, Use Logic:\
+ Don't make a random guess.\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n most frequently in the grid"
   , width / 2 - 900, 760);
 
   // Dividing Line
@@ -518,7 +519,7 @@ function draw() {
     if (j % 3 === 0) {
       strokeWeight(3);
     }
-    else {  
+    else {
       strokeWeight(1);
     }
     let x = gridX + j * cellSize;
@@ -682,6 +683,7 @@ function clearGame() {
   board.clearCurrentPuzzle();
   copyBoardToGame();
 
+  board.mistakeCount = 0;
   gameWon = false;
   gameOver = false;
   cellLocked = false;
@@ -732,6 +734,9 @@ function mousePressed() {
     mouseX < clearX + clearW &&
     mouseY > clearY &&
     mouseY < clearY + clearH) {
+    if (gameWon) {
+      return;
+    }
     clearGame();
     return;
   }
@@ -781,7 +786,7 @@ function mousePressed() {
 
       if (difficulty === "HARD" && board.mistakeCount >= 3) {
         gameOver = true;
-      } 
+      }
       else {
         gameOver = false;
       }
