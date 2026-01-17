@@ -40,6 +40,13 @@ let pauseX, pauseY, pauseW, pauseH;
 let isPaused = false;
 let pausedTimeLeft = 0;
 let hardMistakeLimit = 5;
+let clickSound;
+let correctSound;
+let mistakeSound;
+let victorySound;
+let defeatSound;
+let playedVictory = false;
+let playedDefeat = false;
 
 
 class SudokuBoard {
@@ -154,12 +161,36 @@ function preload() {
   solutionLines = loadStrings("solutions_hard.txt");
   easyPuzzleLines = loadStrings("puzzles_easy.txt");
   easySolutionLines = loadStrings("solutions_easy.txt");
+
+  clickSound = loadSound("sounds/click.mp3");
+  correctSound = loadSound("sounds/correct.mp3");
+  mistakeSound = loadSound("sounds/mistake.mp3");
+  victorySound = loadSound("sounds/victory.mp3");
+  defeatSound = loadSound("sounds/defeat.mp3");
+}
+
+
+function playClick() {
+  if (clickSound && clickSound.isLoaded()) {
+    clickSound.play();
+  }
+}
+
+function playCorrect() {
+  if (correctSound && correctSound.isLoaded()) {
+    correctSound.play();
+  }
+}
+
+function playMistake() {
+  if (mistakeSound && mistakeSound.isLoaded()) {
+    mistakeSound.play();
+  }
 }
 
 
 
 function setup() {
-  pixelDensity(1);
   createCanvas(windowWidth, windowHeight);
 
   easyPuzzles = readGrid(easyPuzzleLines);
@@ -226,6 +257,8 @@ function readGrid(lines) {
       temp = [];
     }
   }
+  playedVictory = false;
+  playedDefeat = false;
   return all;
 }
 
@@ -241,6 +274,11 @@ function draw() {
       cellLocked = true;
       selectedRow = -1;
       selectedCol = -1;
+
+      if (!playedDefeat && defeatSound && defeatSound.isLoaded()) {
+        defeatSound.play();
+        playedDefeat = true;
+      }
     }
   }
 
@@ -407,7 +445,7 @@ function draw() {
 
   noStroke();
   fill(0);
-  textSize(24);
+  textSize(25);
   textAlign(CENTER, CENTER);
   text("REVEAL ANSWER", revealX + revealW / 2, revealY + revealH / 2);
 
@@ -422,7 +460,7 @@ function draw() {
 
   noStroke();
   fill(0);
-  textSize(24);
+  textSize(28);
   textAlign(CENTER, CENTER);
   text("NEW PUZZLE", newX + newW / 2, newY + newH / 2);
   textAlign(LEFT, CENTER);
@@ -457,7 +495,7 @@ function draw() {
 
   noStroke();
   fill(0);
-  textSize(26);
+  textSize(29);
   textAlign(CENTER, CENTER);
 
   if (isPaused) {
@@ -625,6 +663,11 @@ function updateMistakes() {
     cellLocked = true;
     selectedRow = -1;
     selectedCol = -1;
+
+    if (!playedDefeat && defeatSound && defeatSound.isLoaded()) {
+      defeatSound.play();
+      playedDefeat = true;
+    }
     return;
   }
 
@@ -632,6 +675,11 @@ function updateMistakes() {
     gameWon = true;
     selectedRow = -1;
     selectedCol = -1;
+
+    if (!playedDefeat && defeatSound && defeatSound.isLoaded()) {
+      defeatSound.play();
+      playedDefeat = true;
+    }
   }
 }
 
@@ -735,6 +783,8 @@ function clearGame() {
   moveHistory = [];
   isPaused = false;
   pausedTimeLeft = 0;
+  playedVictory = false;
+  playedDefeat = false;
 }
 
 
@@ -753,6 +803,11 @@ function revealAnswer() {
   timeLeft = hardTimeLimit;
   isPaused = false;
   pausedTimeLeft = 0;
+  playedDefeat = false;
+  if (!playedVictory && victorySound && victorySound.isLoaded()) {
+    victorySound.play();
+    playedVictory = true;
+  }
 }
 
 
@@ -771,6 +826,8 @@ function newPuzzle() {
   timeLeft = hardTimeLimit;
   isPaused = false;
   pausedTimeLeft = 0;
+  playedVictory = false;
+  playedDefeat = false;
 }
 
 
@@ -780,6 +837,7 @@ function mousePressed() {
     mouseX < pauseX + pauseW &&
     mouseY > pauseY &&
     mouseY < pauseY + pauseH) {
+    playClick();
 
     if (!gameWon && !gameOver) {
       if (!isPaused) {
@@ -812,6 +870,7 @@ function mousePressed() {
     if (gameWon || gameOver) {
       return;
     }
+    playClick();
     clearGame();
     return;
   }
@@ -824,6 +883,7 @@ function mousePressed() {
     if (gameWon || gameOver) {
       return;
     }
+    playClick();
     revealAnswer();
     return;
   }
@@ -834,6 +894,7 @@ function mousePressed() {
     mouseX < newX + newW &&
     mouseY > newY &&
     mouseY < newY + newH) {
+    playClick();
     newPuzzle();
     return;
   }
@@ -847,6 +908,7 @@ function mousePressed() {
     if (gameWon || gameOver) {
       return;
     }
+    playClick();
 
     if (moveHistory.length > 0) {
       let move = moveHistory.pop();
@@ -882,6 +944,8 @@ function mousePressed() {
     mouseX < gridX + cellSize * 9 &&
     mouseY >= gridY &&
     mouseY < gridY + cellSize * 9) {
+
+    playClick();
     // Calculate the column and row
     let newCol = floor((mouseX - gridX) / cellSize);
     let newRow = floor((mouseY - gridY) / cellSize);
@@ -914,6 +978,7 @@ function mousePressed() {
     timeLeft = hardTimeLimit;
     isPaused = false;
     pausedTimeLeft = 0;
+    playClick();
     return;
   }
 
@@ -937,6 +1002,7 @@ function mousePressed() {
     timeLeft = hardTimeLimit;
     isPaused = false;
     pausedTimeLeft = 0;
+    playClick();
     return;
   }
 }
@@ -973,6 +1039,13 @@ function keyPressed() {
         prevValue: prev,
         newValue: newVal
       });
+
+      if (newVal === solutionGrid[selectedRow][selectedCol]) {
+        playCorrect();
+      }
+      else {
+        playMistake();
+      }
     }
 
     currentGrid[selectedRow][selectedCol] = newVal;
