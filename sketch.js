@@ -36,6 +36,10 @@ let moveHistory = [];
 let hardTimeLimit = 600;
 let timeStart = 0;
 let timeLeft = hardTimeLimit;
+let pauseX, pauseY, pauseW, pauseH;
+let isPaused = false;
+let pausedTimeLeft = 0;
+let hardMistakeLimit = 5;
 
 
 class SudokuBoard {
@@ -83,7 +87,6 @@ class SudokuBoard {
         this.mistakeGrid[r][c] = false;
       }
     }
-    this.mistakeCount = 0;
   }
 
   revealAnswer() {
@@ -156,6 +159,7 @@ function preload() {
 
 
 function setup() {
+  pixelDensity(1);
   createCanvas(windowWidth, windowHeight);
 
   easyPuzzles = readGrid(easyPuzzleLines);
@@ -203,8 +207,6 @@ function setup() {
   moveHistory = [];
   gameOver = false;
   gameWon = false;
-
-  resizeCanvas(windowWidth, windowHeight);
 }
 
 
@@ -230,7 +232,7 @@ function readGrid(lines) {
 function draw() {
   background("#e09db9ff");
 
-  if (!gameWon && !gameOver && difficulty === "HARD") {
+  if (!gameWon && !gameOver && difficulty === "HARD" && !isPaused) {
     let passedSec = floor((millis() - timeStart) / 1000);
     timeLeft = max(0, hardTimeLimit - passedSec);
 
@@ -311,18 +313,26 @@ function draw() {
   textSize(45);
   text("TIPS FOR SOLVING", width / 2 - 900, 630);
 
-  textSize(22);
-  text("• Focus on Rows, Columns, and Boxes:\n Look for areas that have only 1 or 2 empty cells\n to make them easier to fill in.\n• Don't Guess, Use Logic:\
- Don't make a random guess.\n Only place a number if it is logically possible.\n• Scan the board: Try adding numbers that appear\n most frequently in the grid"
-  , width / 2 - 900, 760);
+  textSize(23);
+  text(
+    "• Focus on rows, columns, and boxes:\n  Look for areas with only 1–2 empty cells.\n\n" +
+    "• Don’t guess, use logic:\n  Only place a number if it’s the only possible choice.\n\n" +
+    "• Scan the board:\n  Start with numbers that appear most often.",
+    width / 2 - 900, 780);
 
   // Dividing Line
 
   stroke(0);
   strokeWeight(1);
-  let lineX = width / 2 - 425;
+  let lineX = width / 2 - 395;
   // let availableWidth = width - lineX;
   line(lineX, 0, lineX, height);
+
+  if (undoW === undefined) {
+    undoW = 160;
+  }
+  pauseW = 160;
+  pauseH = clearH;
 
   // Sizes
   clearW = 210;
@@ -334,7 +344,7 @@ function draw() {
 
   // Draw Sudoku Grid
   let buttonGap = 15;
-  let totalButtonsW = clearW + revealW + newW + undoW + buttonGap * 3;
+  let totalButtonsW = clearW + revealW + newW + undoW + pauseW + buttonGap * 4;
   let cellSize = 85;
   let gridSize = cellSize * 9;
   let gridX = width / 2 - 70;
@@ -344,10 +354,6 @@ function draw() {
 
   // let topGap = 18;
 
-
-  if (undoW === undefined) {
-    undoW = 160;
-  }
 
   // Display Mistake Counter
   textSize(40);
@@ -360,7 +366,7 @@ function draw() {
   let cornerY = gridY + gridSize + 20;
   let mistakesTop = "Mistakes: " + board.mistakeCount;
   if (difficulty === "HARD") {
-    mistakesTop += "/3";
+    mistakesTop += "/" + hardMistakeLimit;
   }
   text(mistakesTop, cornerX + 235, cornerY - 150);
 
@@ -439,6 +445,32 @@ function draw() {
   text("UNDO", undoX + undoW / 2, undoY + undoH / 2);
 
   textAlign(LEFT, CENTER);
+
+  pauseX = undoX + undoW + buttonGap;
+  pauseY = topBarY;
+  pauseH = clearH;
+
+  stroke(0);
+  strokeWeight(2);
+  fill(255);
+  rect(pauseX, pauseY, pauseW, pauseH, 10);
+
+  noStroke();
+  fill(0);
+  textSize(26);
+  textAlign(CENTER, CENTER);
+
+  if (isPaused) {
+    text("RESUME", pauseX + pauseW / 2, pauseY + pauseH / 2);
+  }
+  else {
+    text("PAUSE", pauseX + pauseW / 2, pauseY + pauseH / 2);
+  }
+
+  textAlign(LEFT, CENTER);
+
+
+
 
   // Draw Main Sudoku Grid
   noStroke();
@@ -542,29 +574,41 @@ function draw() {
 
   strokeWeight(1);
 
-  // Draw the Sudoku numbers
-  textAlign(CENTER, CENTER);
-  textFont("light montessarat");
-  fill(0);
-  textSize(45);
+  if (isPaused) {
+    noStroke();
+    fill(0, 120);
+    rect(gridX, gridY, gridSize, gridSize);
 
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      let cellValue = currentGrid[r][c];
+    textAlign(CENTER, CENTER);
+    textSize(80);
+    fill(255);
+    text("PAUSED", gridX + gridSize / 2, gridY + gridSize / 2);
+  }
 
-      // Only draw numbers 1 - 9, not zero
-      if (cellValue !== 0) {
+  else {
+    textAlign(CENTER, CENTER);      // Draw the Sudoku numbers
+    textFont("light montessarat");
+    fill(0);
+    textSize(45);
 
-        // Draw Mistakes in Red
-        if (mistakeGrid[r][c]) {
-          fill(200, 0, 0);
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        let cellValue = currentGrid[r][c];
+
+        // Only draw numbers 1 - 9, not zero
+        if (cellValue !== 0) {
+
+          // Draw Mistakes in Red
+          if (mistakeGrid[r][c]) {
+            fill(200, 0, 0);
+          }
+          else {
+            fill(0);
+          }
+          let x = gridX + c * cellSize + cellSize / 2;
+          let y = gridY + r * cellSize + cellSize / 2;
+          text(cellValue, x, y);
         }
-        else {
-          fill(0);
-        }
-        let x = gridX + c * cellSize + cellSize / 2;
-        let y = gridY + r * cellSize + cellSize / 2;
-        text(cellValue, x, y);
       }
     }
   }
@@ -576,7 +620,7 @@ function updateMistakes() {
   board.updateMistakes();
   copyBoardToGame();
 
-  if (difficulty === "HARD" && board.mistakeCount >= 3) {
+  if (difficulty === "HARD" && board.mistakeCount >= hardMistakeLimit) {
     gameOver = true;
     cellLocked = true;
     selectedRow = -1;
@@ -683,15 +727,14 @@ function clearGame() {
   board.clearCurrentPuzzle();
   copyBoardToGame();
 
-  board.mistakeCount = 0;
   gameWon = false;
   gameOver = false;
   cellLocked = false;
   selectedRow = -1;
   selectedCol = -1;
   moveHistory = [];
-  timeStart = millis();
-  timeLeft = hardTimeLimit;
+  isPaused = false;
+  pausedTimeLeft = 0;
 }
 
 
@@ -708,6 +751,8 @@ function revealAnswer() {
   moveHistory = [];
   timeStart = millis();
   timeLeft = hardTimeLimit;
+  isPaused = false;
+  pausedTimeLeft = 0;
 }
 
 
@@ -724,17 +769,47 @@ function newPuzzle() {
   moveHistory = [];
   timeStart = millis();
   timeLeft = hardTimeLimit;
+  isPaused = false;
+  pausedTimeLeft = 0;
 }
 
 
-// Detects which Sudoku cell the user clicks and stores its row and column
 function mousePressed() {
+  // Pause/Resume Button
+  if (mouseX > pauseX &&
+    mouseX < pauseX + pauseW &&
+    mouseY > pauseY &&
+    mouseY < pauseY + pauseH) {
+
+    if (!gameWon && !gameOver) {
+      if (!isPaused) {
+        isPaused = true;
+        pausedTimeLeft = timeLeft;
+        selectedRow = -1;
+        selectedCol = -1;
+        cellLocked = true;
+      }
+      else {
+        isPaused = false;
+        cellLocked = false;
+
+        timeStart = millis() - (hardTimeLimit - pausedTimeLeft) * 1000;
+        timeLeft = pausedTimeLeft;
+      }
+    }
+    return;
+  }
+
+  if (isPaused) {
+    return;
+  }
+
   // clear Button Click
   if (mouseX > clearX &&
     mouseX < clearX + clearW &&
     mouseY > clearY &&
     mouseY < clearY + clearH) {
-    if (gameWon) {
+    if (gameWon || gameOver) {
       return;
     }
     clearGame();
@@ -746,6 +821,9 @@ function mousePressed() {
     mouseX < revealX + revealW &&
     mouseY > revealY &&
     mouseY < revealY + revealH) {
+    if (gameWon || gameOver) {
+      return;
+    }
     revealAnswer();
     return;
   }
@@ -784,7 +862,7 @@ function mousePressed() {
 
       gameWon = board.checkWin();
 
-      if (difficulty === "HARD" && board.mistakeCount >= 3) {
+      if (difficulty === "HARD" && board.mistakeCount >= 5) {
         gameOver = true;
       }
       else {
@@ -834,6 +912,8 @@ function mousePressed() {
     moveHistory = [];
     timeStart = millis();
     timeLeft = hardTimeLimit;
+    isPaused = false;
+    pausedTimeLeft = 0;
     return;
   }
 
@@ -855,6 +935,8 @@ function mousePressed() {
     moveHistory = [];
     timeStart = millis();
     timeLeft = hardTimeLimit;
+    isPaused = false;
+    pausedTimeLeft = 0;
     return;
   }
 }
@@ -863,7 +945,7 @@ function mousePressed() {
 
 // Let User Enter and Delete Numbers (Not the Helper Numbers)
 function keyPressed() {
-  if (gameWon || gameOver) {
+  if (gameWon || gameOver || isPaused) {
     return;
   }
 
@@ -911,10 +993,4 @@ function keyPressed() {
     cellLocked = false;     // unlock cell after removing number
     updateMistakes();
   }
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  selectedRow = -1;
-  selectedCol = -1;
 }

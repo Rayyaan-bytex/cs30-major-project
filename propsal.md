@@ -19,7 +19,7 @@
 - Check if user has completed the level
 - Add a restart/clear button
 - Add a New Puzzle Button
-- Adding Sound effects
+- Adding Sound Effects
 
 ## Nice To Have
 
