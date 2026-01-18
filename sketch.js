@@ -155,13 +155,15 @@ class SudokuBoard {
 }
 
 
-// Loads the text file containing 10 sudoku puzzles 
+// Loads the text/sound files before sketch starts
 function preload() {
+  // Puzzle + Solution text files
   puzzleLines = loadStrings("puzzles_hard.txt");
   solutionLines = loadStrings("solutions_hard.txt");
   easyPuzzleLines = loadStrings("puzzles_easy.txt");
   easySolutionLines = loadStrings("solutions_easy.txt");
 
+  // Sound Effects
   clickSound = loadSound("sounds/click.mp3");
   correctSound = loadSound("sounds/correct.mp3");
   mistakeSound = loadSound("sounds/mistake.mp3");
@@ -170,6 +172,7 @@ function preload() {
 }
 
 
+// Helper functions to not repeat the same code everywhere
 function playClick() {
   if (clickSound && clickSound.isLoaded()) {
     clickSound.play();
@@ -189,23 +192,20 @@ function playMistake() {
 }
 
 
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
+  // Converts Easy Files into arrays of 9 lines puzzles/solutions
   easyPuzzles = readGrid(easyPuzzleLines);
   easySolutions = readGrid(easySolutionLines);
 
-  // Extracts the text file into puzzles
+  // Temporary holders while building hard puzzles
+  let tempPuzzle = [];        // Holds one puzzle (9 Lines)
+  let tempSolution = [];      // Holds one solution (9 Lines)
 
-  let tempPuzzle = [];        // Holds one puzzle
-  let tempSolution = [];
-
-  // READ PUZZLES - Loop through all lines loaded from the file 
+  // Read Hard Puzzles
   for (let line of puzzleLines) {
-
-    // Skip lines like 'Grid 01'"
-    if (line[0] === "G") {
+    if (line[0] === "G") {        // Skip lines like 'Grid 01'"
       continue;
     }
     tempPuzzle.push(line);        // Add the puzzle in temporary array
@@ -213,13 +213,13 @@ function setup() {
     // If 9 Lines are added, Puzzle Complete
     if (tempPuzzle.length === 9) {
       puzzles.push(tempPuzzle.concat());    // Saves the Puzzle to Puzzle List
-      tempPuzzle = [];      // Resets Array for Next Puzzle
+      tempPuzzle = [];                      // Resets Array for Next Puzzle
     }
   }
 
-  // - - - READ SOLUTIONS - - - 
+  // Read Hard Solutions
   for (let line of solutionLines) {
-    if (line[0] === "G") {
+    if (line[0] === "G") {                  // Skip lines like 'Grid 01'"
       continue;
     }
     tempSolution.push(line);
@@ -230,51 +230,58 @@ function setup() {
     }
   }
 
+  // Creates the board and pulls its grids into the global variables
   board = new SudokuBoard(puzzles, solutions);
   copyBoardToGame();
 
+  // Start timer and reset game flags
   timeStart = millis();
   timeLeft = hardTimeLimit;
   moveHistory = [];
   gameOver = false;
   gameWon = false;
+
+  // Reset sound flags
+  playedVictory = false;
+  playedDefeat = false;
 }
 
 
 // Turns the file lines into an array of 9 line grids
 function readGrid(lines) {
-  let all = [];
-  let temp = [];
+  let all = [];               // Stores all puzzles
+  let temp = [];              // Stores 1 puzzle (9 Lines)
 
   for (let line of lines) {
-    if (line[0] === "G") {
+    if (line[0] === "G") {    // Skip "Grid 01" Lines
       continue;
     }
     temp.push(line);
 
     if (temp.length === 9) {
-      all.push(temp.concat());
-      temp = [];
+      all.push(temp.concat());  // Save Puzzle
+      temp = [];                // Reset for next one
     }
   }
-  playedVictory = false;
-  playedDefeat = false;
   return all;
 }
 
 function draw() {
   background("#e09db9ff");
 
+  // Timer (Hard mode only) 
   if (!gameWon && !gameOver && difficulty === "HARD" && !isPaused) {
     let passedSec = floor((millis() - timeStart) / 1000);
     timeLeft = max(0, hardTimeLimit - passedSec);
 
+    // Time ran out = game over
     if (timeLeft === 0) {
       gameOver = true;
       cellLocked = true;
       selectedRow = -1;
       selectedCol = -1;
 
+      // Play defeat sound once
       if (!playedDefeat && defeatSound && defeatSound.isLoaded()) {
         defeatSound.play();
         playedDefeat = true;
@@ -282,17 +289,13 @@ function draw() {
     }
   }
 
+  // Text Styling (default)
   textAlign(LEFT, CENTER);
   fill("#2e351dff");
   textFont("Montserrat");
-
-  // Adding Text (Instructions, Headings, etc
-  strokeWeight(1);
   noStroke();
 
-  // let leftW = 380;
-  // let gap = 45;
-
+  // LEFT PANEL (Instructions + Tips)
   textSize(100);
   text("SUDOKU", width / 2 - 900, 140);
 
@@ -300,52 +303,44 @@ function draw() {
   text("HOW TO PLAY", width / 2 - 900, 225);
 
   textSize(23);
-  text("To complete the Sudoku grid\nEnter numbers into the blank spaces\nSo that each row, column, and 3x3 box\nContains the numbers 1 - 9 without repitition",
-    width / 2 - 900, 320);
+  text(
+    "To complete the Sudoku grid\n" +
+    "Enter numbers into the blank spaces\n" +
+    "So that each row, column, and 3x3 box\n" +
+    "Contains the numbers 1 - 9 without repitition",
+    width / 2 - 900, 320
+  );
 
   textSize(45);
   text("DIFFICULTY LEVELS", width / 2 - 900, 430);
 
-  // Shows which one is Selected (small text)
+  // Show selected difficulty
   textSize(35);
   fill(0);
-  textAlign(LEFT, CENTER);
   text("Selected: " + difficulty, width / 2 - 900, 490);
 
-  easyW = 170;
-  easyH = 55;
+  // Difficulty button sizes + positions
+  easyW = 170;  easyH = 55;
   easyX = width / 2 - 900;
   easyY = 520;
 
-  hardW = 170;
-  hardH = 55;
+  hardW = 170;  hardH = 55;
   hardX = easyX + easyW + 40;
   hardY = easyY;
 
-  // Easy Button
-  stroke(0);
-  strokeWeight(2);
-  fill(255);
+  // Draw EASY button
+  stroke(0); strokeWeight(2); fill(255);
   rect(easyX, easyY, easyW, easyH, 10);
-
-  noStroke();
-  fill(0);
-  textSize(24);
-  textAlign(CENTER, CENTER);
+  noStroke(); fill(0); textSize(24); textAlign(CENTER, CENTER);
   text("EASY", easyX + easyW / 2, easyY + easyH / 2);
 
-  // Hard Button
-  stroke(0);
-  strokeWeight(2);
-  fill(255);
+  // Draw HARD button
+  stroke(0); strokeWeight(2); fill(255);
   rect(hardX, hardY, hardW, hardH, 10);
-
-  noStroke();
-  fill(0);
-  textSize(24);
-  textAlign(CENTER, CENTER);
+  noStroke(); fill(0); textSize(24);
   text("HARD", hardX + hardW / 2, hardY + hardH / 2);
 
+  // Tips section
   textAlign(LEFT, CENTER);
   fill("#2e351dff");
   textSize(45);
@@ -356,62 +351,53 @@ function draw() {
     "• Focus on rows, columns, and boxes:\n  Look for areas with only 1–2 empty cells.\n\n" +
     "• Don’t guess, use logic:\n  Only place a number if it’s the only possible choice.\n\n" +
     "• Scan the board:\n  Start with numbers that appear most often.",
-    width / 2 - 900, 780);
+    width / 2 - 900, 780
+  );
 
   // Dividing Line
-
   stroke(0);
   strokeWeight(1);
   let lineX = width / 2 - 395;
-  // let availableWidth = width - lineX;
   line(lineX, 0, lineX, height);
 
-  if (undoW === undefined) {
-    undoW = 160;
-  }
-  pauseW = 160;
-  pauseH = clearH;
+  // Button Sizes
+  clearW = 210;  clearH = 65;
+  revealW = 230; revealH = clearH;
+  newW = 210;    newH = clearH;
+  undoW = 160;   undoH = clearH;
+  pauseW = 160;  pauseH = clearH;   
 
-  // Sizes
-  clearW = 210;
-  clearH = 65;
-  revealW = 230;
-  revealH = clearH;
-  newW = 210;
-  newH = clearH;
-
-  // Draw Sudoku Grid
-  let buttonGap = 15;
-  let totalButtonsW = clearW + revealW + newW + undoW + pauseW + buttonGap * 4;
+  // Grid Layout
   let cellSize = 85;
   let gridSize = cellSize * 9;
   let gridX = width / 2 - 70;
   let gridY = height / 2 - 320;
+
+  // Top bar (buttons) on top of grid
   let topBarY = gridY - 80;
+  let buttonGap = 15;
+
+  // Total width of all buttons and gaps
+  let totalButtonsW = clearW + revealW + newW + undoW + pauseW + buttonGap * 4;
+
+  // Center buttons above grid
   let startX = gridX + (gridSize - totalButtonsW) / 2;
 
-  // let topGap = 18;
-
-
-  // Display Mistake Counter
+  // Mistakes and Time
   textSize(40);
   fill(0);
   textAlign(RIGHT, TOP);
-  // let bottomY = gridY + gridSize + 35;
-  // let leftEdge = gridX;
-  // let rightEdge = gridX + gridSize;
+
   let cornerX = gridX + gridSize;
   let cornerY = gridY + gridSize + 20;
+
   let mistakesTop = "Mistakes: " + board.mistakeCount;
   if (difficulty === "HARD") {
     mistakesTop += "/" + hardMistakeLimit;
   }
   text(mistakesTop, cornerX + 235, cornerY - 150);
 
-  let mistakesW = textWidth(mistakesTop);
-  let totalBarW = mistakesW + 30 + totalButtonsW;
-  // let barX = gridX + (gridSize - totalBarW) / 2;
-
+  // Time display (Hard only)
   if (difficulty === "HARD") {
     textAlign(LEFT, TOP);
     let mins = floor(timeLeft / 60);
@@ -420,122 +406,76 @@ function draw() {
     text(timeText, cornerX + 20, cornerY - 95);
   }
 
+  // Clear
   clearX = startX;
   clearY = topBarY;
-
-  stroke(0);
-  strokeWeight(2);
-  fill(255);
+  stroke(0); strokeWeight(2); fill(255);
   rect(clearX, clearY, clearW, clearH, 10);
-
-  noStroke();
-  fill(0);
-  textSize(28);
-  textAlign(CENTER, CENTER);
+  noStroke(); fill(0); textSize(28); textAlign(CENTER, CENTER);
   text("CLEAR", clearX + clearW / 2, clearY + clearH / 2);
 
-  // Draw Reveal Answers Button
+  // Reveal Answer
   revealX = clearX + clearW + buttonGap;
   revealY = topBarY;
-
-  stroke(0);
-  strokeWeight(2);
-  fill(255);
+  stroke(0); strokeWeight(2); fill(255);
   rect(revealX, revealY, revealW, revealH, 10);
-
-  noStroke();
-  fill(0);
-  textSize(25);
-  textAlign(CENTER, CENTER);
+  noStroke(); fill(0); textSize(25);
   text("REVEAL ANSWER", revealX + revealW / 2, revealY + revealH / 2);
 
-  // New Puzzle Button
+  // New Puzzle
   newX = revealX + revealW + buttonGap;
   newY = topBarY;
-
-  stroke(0);
-  strokeWeight(2);
-  fill(255);
+  stroke(0); strokeWeight(2); fill(255);
   rect(newX, newY, newW, newH, 10);
-
-  noStroke();
-  fill(0);
-  textSize(28);
-  textAlign(CENTER, CENTER);
+  noStroke(); fill(0); textSize(28);
   text("NEW PUZZLE", newX + newW / 2, newY + newH / 2);
-  textAlign(LEFT, CENTER);
 
-  // UNDO Button 
-  undoW = 160;
-  undoH = clearH;
+  // UNDO
   undoX = newX + newW + buttonGap;
   undoY = topBarY;
-
-  stroke(0);
-  strokeWeight(2);
-  fill(255);
+  stroke(0); strokeWeight(2); fill(255);
   rect(undoX, undoY, undoW, undoH, 10);
-
-  noStroke();
-  fill(0);
-  textSize(28);
-  textAlign(CENTER, CENTER);
+  noStroke(); fill(0); textSize(28);
   text("UNDO", undoX + undoW / 2, undoY + undoH / 2);
 
-  textAlign(LEFT, CENTER);
-
+  // Pause / Resume
   pauseX = undoX + undoW + buttonGap;
   pauseY = topBarY;
-  pauseH = clearH;
-
-  stroke(0);
-  strokeWeight(2);
-  fill(255);
+  stroke(0); strokeWeight(2); fill(255);
   rect(pauseX, pauseY, pauseW, pauseH, 10);
-
-  noStroke();
-  fill(0);
-  textSize(29);
-  textAlign(CENTER, CENTER);
+  noStroke(); fill(0); textSize(29);
 
   if (isPaused) {
     text("RESUME", pauseX + pauseW / 2, pauseY + pauseH / 2);
-  }
-  else {
+  } else {
     text("PAUSE", pauseX + pauseW / 2, pauseY + pauseH / 2);
   }
 
-  textAlign(LEFT, CENTER);
-
-
-
-
-  // Draw Main Sudoku Grid
+  // Draw Grid Background
   noStroke();
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
       fill("#8a8888ff");
-      rect(gridX + col * cellSize, gridY + row * cellSize, cellSize, cellSize);   // Calculate position based on grid starting point and cell index
+      rect(gridX + col * cellSize, gridY + row * cellSize, cellSize, cellSize);
     }
   }
 
-  // Highlighting Row, Col, Box, and all Instances of Same Number
+  // Highlights Selected Row/Col/Box
   if (selectedRow !== -1 && selectedCol !== -1) {
     let boxRow = floor(selectedRow / 3) * 3;
     let boxCol = floor(selectedCol / 3) * 3;
-    noStroke();     // Highlight the 3x3 Box
+
+    noStroke();
     fill(255, 255, 255, 35);
     rect(gridX + boxCol * cellSize, gridY + boxRow * cellSize, cellSize * 3, cellSize * 3);
 
-    // Highlight the Selected Row
     fill(255, 255, 255, 25);
     rect(gridX, gridY + selectedRow * cellSize, gridSize, cellSize);
 
-    // Highlight the Selected Col
     fill(255, 255, 255, 25);
     rect(gridX + selectedCol * cellSize, gridY, cellSize, gridSize);
 
-    // Highlight Every Instance of Selected Number
+    // Same number highlights
     let selectedValue = currentGrid[selectedRow][selectedCol];
     if (selectedValue !== 0) {
       fill(255, 255, 0, 80);
@@ -547,55 +487,31 @@ function draw() {
         }
       }
     }
-    // Darker Highlight for Selected Cell on TOp
+
+    // Selected cell highlight
     fill(255, 255, 0, 110);
     rect(gridX + selectedCol * cellSize, gridY + selectedRow * cellSize, cellSize, cellSize);
   }
 
-
-  // Highlight Selected Cell
-  if (selectedRow !== -1 && selectedCol !== -1) {
-    noStroke();
-    fill(255, 255, 0, 120);     // Highlighted with yellow color with transparency
-
-    let highlightX = gridX + selectedCol * cellSize;
-    let highlightY = gridY + selectedRow * cellSize;
-
-    rect(highlightX, highlightY, cellSize, cellSize);       // Draw a rectangle over the selected cell to highlight it
-  }
-
-  // Make 3X3 lines thick + thin
+  // Grid Lines
   stroke(0);
-
-  // Make Border Thick
   strokeWeight(3);
   noFill();
   rect(gridX, gridY, gridSize, gridSize);
 
-  // Horizontal Lines
   for (let i = 1; i < 9; i++) {
-    if (i % 3 === 0) {
-      strokeWeight(3);
-    }
-    else {
-      strokeWeight(1);
-    }
+    strokeWeight(i % 3 === 0 ? 3 : 1);
     let y = gridY + i * cellSize;
     line(gridX, y, gridX + gridSize, y);
   }
 
-  // Verticle Lines
   for (let j = 1; j < 9; j++) {
-    if (j % 3 === 0) {
-      strokeWeight(3);
-    }
-    else {
-      strokeWeight(1);
-    }
+    strokeWeight(j % 3 === 0 ? 3 : 1);
     let x = gridX + j * cellSize;
     line(x, gridY, x, gridY + gridSize);
   }
 
+  // Win/Lose text
   if (gameWon) {
     textAlign(CENTER, CENTER);
     textSize(100);
@@ -610,8 +526,7 @@ function draw() {
     text("GAME\nOVER!", lineX / 2 + 450, height / 2);
   }
 
-  strokeWeight(1);
-
+  // Pause
   if (isPaused) {
     noStroke();
     fill(0, 120);
@@ -621,28 +536,17 @@ function draw() {
     textSize(80);
     fill(255);
     text("PAUSED", gridX + gridSize / 2, gridY + gridSize / 2);
-  }
-
-  else {
-    textAlign(CENTER, CENTER);      // Draw the Sudoku numbers
+  } else {
+    // Draw numbers normally
+    textAlign(CENTER, CENTER);
     textFont("light montessarat");
-    fill(0);
     textSize(45);
 
     for (let r = 0; r < 9; r++) {
       for (let c = 0; c < 9; c++) {
         let cellValue = currentGrid[r][c];
-
-        // Only draw numbers 1 - 9, not zero
         if (cellValue !== 0) {
-
-          // Draw Mistakes in Red
-          if (mistakeGrid[r][c]) {
-            fill(200, 0, 0);
-          }
-          else {
-            fill(0);
-          }
+          fill(mistakeGrid[r][c] ? color(200, 0, 0) : 0);
           let x = gridX + c * cellSize + cellSize / 2;
           let y = gridY + r * cellSize + cellSize / 2;
           text(cellValue, x, y);
@@ -653,33 +557,216 @@ function draw() {
 }
 
 
-// Recheck Entire Board After Every Move
-function updateMistakes() {
-  board.updateMistakes();
-  copyBoardToGame();
+function mousePressed() {
 
-  if (difficulty === "HARD" && board.mistakeCount >= hardMistakeLimit) {
-    gameOver = true;
-    cellLocked = true;
-    selectedRow = -1;
-    selectedCol = -1;
+  // Pause / Resume button
+  if (mouseX > pauseX && mouseX < pauseX + pauseW &&
+      mouseY > pauseY && mouseY < pauseY + pauseH) {
 
-    if (!playedDefeat && defeatSound && defeatSound.isLoaded()) {
-      defeatSound.play();
-      playedDefeat = true;
+    playClick(); // click sound
+
+    if (!gameWon && !gameOver) {
+      if (!isPaused) {
+        isPaused = true;               // freeze game
+        pausedTimeLeft = timeLeft;     // store time
+        selectedRow = -1;
+        selectedCol = -1;
+        cellLocked = true;             // lock input
+      }
+      else {
+        isPaused = false;              // resume game
+        cellLocked = false;
+
+        // resume timer from paused spot
+        timeStart = millis() - (hardTimeLimit - pausedTimeLeft) * 1000;
+        timeLeft = pausedTimeLeft;
+      }
+    }
+    return; // stop here
+  }
+
+  // if paused, ignore all clicks
+  if (isPaused) {
+    return;
+  }
+
+  // Clear button
+  if (mouseX > clearX && mouseX < clearX + clearW &&
+      mouseY > clearY && mouseY < clearY + clearH) {
+
+    if (gameWon || gameOver) return;   // don’t clear end screen
+    playClick();                       // click sound
+    clearGame();                       // clear board
+    return;
+  }
+
+  // Reveal button
+  if (mouseX > revealX && mouseX < revealX + revealW &&
+      mouseY > revealY && mouseY < revealY + revealH) {
+
+    if (gameWon || gameOver) return;   // block at end
+    playClick();
+    revealAnswer();
+    return;
+  }
+
+  // New Puzzle button
+  if (mouseX > newX && mouseX < newX + newW &&
+      mouseY > newY && mouseY < newY + newH) {
+
+    playClick();
+    newPuzzle();
+    return;
+  }
+
+  // UNDO button
+  if (mouseX > undoX && mouseX < undoX + undoW &&
+      mouseY > undoY && mouseY < undoY + undoH) {
+
+    if (gameWon || gameOver) return;   // no undo after finish
+    playClick();
+
+    if (moveHistory.length > 0) {
+      let move = moveHistory.pop();    // last move
+
+      currentGrid[move.row][move.col] = move.prevValue; // revert
+
+      selectedRow = move.row;          // go back to cell
+      selectedCol = move.col;
+      cellLocked = false;
+
+      board.updateMistakes();          // re-check mistakes
+      copyBoardToGame();
+
+      gameWon = board.checkWin();      // re-check win
+      gameOver = (difficulty === "HARD" && board.mistakeCount >= hardMistakeLimit);
     }
     return;
   }
 
-  if (board.checkWin()) {
-    gameWon = true;
+  // GRID click (select cell)
+  let cellSize = 85;
+  let gridX = width / 2 - 70;
+  let gridY = height / 2 - 320;
+
+  if (mouseX >= gridX && mouseX < gridX + cellSize * 9 &&
+      mouseY >= gridY && mouseY < gridY + cellSize * 9) {
+
+    playClick(); // click only on grid
+
+    let newCol = floor((mouseX - gridX) / cellSize);
+    let newRow = floor((mouseY - gridY) / cellSize);
+
+    if (newRow !== selectedRow || newCol !== selectedCol) {
+      cellLocked = false; // allow new input
+    }
+
+    selectedCol = newCol;
+    selectedRow = newRow;
+    return; // stop here (important)
+  }
+
+  // EASY button
+  if (mouseX >= easyX && mouseX < easyX + easyW &&
+      mouseY >= easyY && mouseY < easyY + easyH) {
+
+    playClick();
+
+    difficulty = "EASY";
+    board.setPuzzle(easyPuzzles, easySolutions);
+    copyBoardToGame();
+
+    gameWon = false;
+    gameOver = false;
     selectedRow = -1;
     selectedCol = -1;
+    cellLocked = false;
+    moveHistory = [];
 
-    if (!playedDefeat && defeatSound && defeatSound.isLoaded()) {
-      defeatSound.play();
-      playedDefeat = true;
+    timeStart = millis();
+    timeLeft = hardTimeLimit;
+    isPaused = false;
+    pausedTimeLeft = 0;
+    return;
+  }
+
+  // HARD button
+  if (mouseX >= hardX && mouseX < hardX + hardW &&
+      mouseY >= hardY && mouseY < hardY + hardH) {
+
+    playClick();
+
+    difficulty = "HARD";
+    board.setPuzzle(puzzles, solutions);
+    copyBoardToGame();
+
+    gameWon = false;
+    gameOver = false;
+    selectedRow = -1;
+    selectedCol = -1;
+    cellLocked = false;
+    moveHistory = [];
+
+    timeStart = millis();
+    timeLeft = hardTimeLimit;
+    isPaused = false;
+    pausedTimeLeft = 0;
+    return;
+  }
+}
+
+
+
+// Let User Enter and Delete Numbers (Not the Helper Numbers)
+function keyPressed() {
+  if (gameWon || gameOver || isPaused) return;         // ignore input now
+  if (selectedRow === -1 || selectedCol === -1) return; // no cell picked
+  if (fixedGrid[selectedRow][selectedCol] !== 0) return; // helper cell locked
+
+  // block overwriting unless you re click cell
+  if (cellLocked && key >= "1" && key <= "9") return;
+
+  let prev = currentGrid[selectedRow][selectedCol];
+
+  // number input
+  if (key >= "1" && key <= "9") {
+    let newVal = int(key);
+
+    if (newVal !== prev) {
+      moveHistory.push({              // save move for undo
+        row: selectedRow,
+        col: selectedCol,
+        prevValue: prev,
+        newValue: newVal
+      });
+
+      // play correct/wrong sound
+      if (newVal === solutionGrid[selectedRow][selectedCol]) {
+        playCorrect();
+      } else {
+        playMistake();
+      }
     }
+
+    currentGrid[selectedRow][selectedCol] = newVal;
+    cellLocked = true;
+    updateMistakes();
+  }
+
+  // delete / backspace
+  if (keyCode === BACKSPACE || keyCode === DELETE) {
+    if (prev !== 0) {
+      moveHistory.push({              // save delete undo
+        row: selectedRow,
+        col: selectedCol,
+        prevValue: prev,
+        newValue: 0
+      });
+    }
+
+    currentGrid[selectedRow][selectedCol] = 0;
+    cellLocked = false;
+    updateMistakes();
   }
 }
 
@@ -828,242 +915,4 @@ function newPuzzle() {
   pausedTimeLeft = 0;
   playedVictory = false;
   playedDefeat = false;
-}
-
-
-function mousePressed() {
-  // Pause/Resume Button
-  if (mouseX > pauseX &&
-    mouseX < pauseX + pauseW &&
-    mouseY > pauseY &&
-    mouseY < pauseY + pauseH) {
-    playClick();
-
-    if (!gameWon && !gameOver) {
-      if (!isPaused) {
-        isPaused = true;
-        pausedTimeLeft = timeLeft;
-        selectedRow = -1;
-        selectedCol = -1;
-        cellLocked = true;
-      }
-      else {
-        isPaused = false;
-        cellLocked = false;
-
-        timeStart = millis() - (hardTimeLimit - pausedTimeLeft) * 1000;
-        timeLeft = pausedTimeLeft;
-      }
-    }
-    return;
-  }
-
-  if (isPaused) {
-    return;
-  }
-
-  // clear Button Click
-  if (mouseX > clearX &&
-    mouseX < clearX + clearW &&
-    mouseY > clearY &&
-    mouseY < clearY + clearH) {
-    if (gameWon || gameOver) {
-      return;
-    }
-    playClick();
-    clearGame();
-    return;
-  }
-
-  // Reveal Answer Button Click
-  if (mouseX > revealX &&
-    mouseX < revealX + revealW &&
-    mouseY > revealY &&
-    mouseY < revealY + revealH) {
-    if (gameWon || gameOver) {
-      return;
-    }
-    playClick();
-    revealAnswer();
-    return;
-  }
-
-
-  // New Puzzle Button Click
-  if (mouseX > newX &&
-    mouseX < newX + newW &&
-    mouseY > newY &&
-    mouseY < newY + newH) {
-    playClick();
-    newPuzzle();
-    return;
-  }
-
-  // UNDO Button Click
-  if (mouseX > undoX &&
-    mouseX < undoX + undoW &&
-    mouseY > undoY &&
-    mouseY < undoY + undoH) {
-
-    if (gameWon || gameOver) {
-      return;
-    }
-    playClick();
-
-    if (moveHistory.length > 0) {
-      let move = moveHistory.pop();
-
-      currentGrid[move.row][move.col] = move.prevValue;
-
-      selectedRow = move.row;
-      selectedCol = move.col;
-      cellLocked = false;
-
-      board.updateMistakes();
-      copyBoardToGame();
-
-      gameWon = board.checkWin();
-
-      if (difficulty === "HARD" && board.mistakeCount >= 5) {
-        gameOver = true;
-      }
-      else {
-        gameOver = false;
-      }
-    }
-    return;
-  }
-
-  // Grid Position and Size
-  let cellSize = 85;
-  let gridX = width / 2 - 70;
-  let gridY = height / 2 - 320;
-
-  // Check if mouse is inside the grid
-  if (mouseX >= gridX &&
-    mouseX < gridX + cellSize * 9 &&
-    mouseY >= gridY &&
-    mouseY < gridY + cellSize * 9) {
-
-    playClick();
-    // Calculate the column and row
-    let newCol = floor((mouseX - gridX) / cellSize);
-    let newRow = floor((mouseY - gridY) / cellSize);
-    // If clicking a different cell, unlock the input to enter new number
-    if (newRow !== selectedRow || newCol !== selectedCol) {
-      cellLocked = false;
-    }
-    // Store the new selected cell
-    selectedCol = newCol;
-    selectedRow = newRow;
-  }
-
-  // Easy Button Click
-  if (mouseX >= easyX &&
-    mouseX < easyX + easyW &&
-    mouseY >= easyY &&
-    mouseY < easyY + easyH) {
-
-    difficulty = "EASY";
-    board.setPuzzle(easyPuzzles, easySolutions);
-    copyBoardToGame();
-
-    gameWon = false;
-    gameOver = false;
-    selectedRow = -1;
-    selectedCol = -1;
-    cellLocked = false;
-    moveHistory = [];
-    timeStart = millis();
-    timeLeft = hardTimeLimit;
-    isPaused = false;
-    pausedTimeLeft = 0;
-    playClick();
-    return;
-  }
-
-  // Hard Button Click
-  if (mouseX >= hardX &&
-    mouseX < hardX + hardW &&
-    mouseY >= hardY &&
-    mouseY < hardY + hardH) {
-
-    difficulty = "HARD";
-    board.setPuzzle(puzzles, solutions);
-    copyBoardToGame();
-
-    gameWon = false;
-    gameOver = false;
-    selectedRow = -1;
-    selectedCol = -1;
-    cellLocked = false;
-    moveHistory = [];
-    timeStart = millis();
-    timeLeft = hardTimeLimit;
-    isPaused = false;
-    pausedTimeLeft = 0;
-    playClick();
-    return;
-  }
-}
-
-
-
-// Let User Enter and Delete Numbers (Not the Helper Numbers)
-function keyPressed() {
-  if (gameWon || gameOver || isPaused) {
-    return;
-  }
-
-  if (selectedRow === -1 || selectedCol === -1) {     // If no cell is selected, do nothing
-    return;
-  }
-
-  if (fixedGrid[selectedRow][selectedCol] !== 0) {      // if the cell is a helper number, do nothing
-    return;
-  }
-
-  if (cellLocked && key >= "1" && key <= "9") {     // Prevent overwriting a number unless the cell has been unlocked by clicking it again
-    return;
-  }
-
-  let prev = currentGrid[selectedRow][selectedCol];
-
-  if (key >= "1" && key <= "9") {
-    let newVal = int(key);
-
-    if (newVal !== prev) {
-      moveHistory.push({
-        row: selectedRow,
-        col: selectedCol,
-        prevValue: prev,
-        newValue: newVal
-      });
-
-      if (newVal === solutionGrid[selectedRow][selectedCol]) {
-        playCorrect();
-      }
-      else {
-        playMistake();
-      }
-    }
-
-    currentGrid[selectedRow][selectedCol] = newVal;
-    cellLocked = true;
-    updateMistakes();
-  }
-
-  if (keyCode === BACKSPACE || keyCode === DELETE) {      // If user presses backspace or delete
-    if (prev !== 0) {
-      moveHistory.push({
-        row: selectedRow,
-        col: selectedCol,
-        prevValue: prev,
-        newValue: 0
-      });
-    }
-    currentGrid[selectedRow][selectedCol] = 0;      // Clear the selected cell
-    cellLocked = false;     // unlock cell after removing number
-    updateMistakes();
-  }
 }
