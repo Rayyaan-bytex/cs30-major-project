@@ -14,7 +14,7 @@ let easyPuzzles = [];
 let easySolutions = [];
 let difficulty = "HARD";                // Which mode the player is in
 let chosenPuzzle;                       // The puzzle/solution chosen for this round
-let chosenSolution = []; 
+let chosenSolution = [];
 let currentGrid;                        // The grids the game uses   
 let solutionGrid;
 let fixedGrid;
@@ -157,7 +157,7 @@ class SudokuBoard {
 
 // Loads the text/sound files before sketch starts
 function preload() {
-  // Puzzle + Solution text files
+  // Puzzle and Solution text files
   puzzleLines = loadStrings("puzzles_hard.txt");
   solutionLines = loadStrings("solutions_hard.txt");
   easyPuzzleLines = loadStrings("puzzles_easy.txt");
@@ -320,11 +320,11 @@ function draw() {
   text("Selected: " + difficulty, width / 2 - 900, 490);
 
   // Difficulty button sizes + positions
-  easyW = 170;  easyH = 55;
+  easyW = 170; easyH = 55;
   easyX = width / 2 - 900;
   easyY = 520;
 
-  hardW = 170;  hardH = 55;
+  hardW = 170; hardH = 55;
   hardX = easyX + easyW + 40;
   hardY = easyY;
 
@@ -361,11 +361,11 @@ function draw() {
   line(lineX, 0, lineX, height);
 
   // Button Sizes
-  clearW = 210;  clearH = 65;
+  clearW = 210; clearH = 65;
   revealW = 230; revealH = clearH;
-  newW = 210;    newH = clearH;
-  undoW = 160;   undoH = clearH;
-  pauseW = 160;  pauseH = clearH;   
+  newW = 210; newH = clearH;
+  undoW = 160; undoH = clearH;
+  pauseW = 160; pauseH = clearH;
 
   // Grid Layout
   let cellSize = 85;
@@ -558,41 +558,42 @@ function draw() {
 
 
 function mousePressed() {
+  // Pause / Resume Button
+  if (mouseX > pauseX &&
+    mouseX < pauseX + pauseW &&
+    mouseY > pauseY &&
+    mouseY < pauseY + pauseH) {
 
-  // Pause / Resume button
-  if (mouseX > pauseX && mouseX < pauseX + pauseW &&
-      mouseY > pauseY && mouseY < pauseY + pauseH) {
+    playClick();   // button click sound
 
-    playClick(); // click sound
-
+    // don’t allow pausing after win or game over
     if (!gameWon && !gameOver) {
+
       if (!isPaused) {
-        isPaused = true;               // freeze game
-        pausedTimeLeft = timeLeft;     // store time
+        // PAUSE the game
+        isPaused = true;
+        pausedTimeLeft = timeLeft;   // remember remaining time
+
         selectedRow = -1;
         selectedCol = -1;
-        cellLocked = true;             // lock input
+        cellLocked = true;           // lock the grid
       }
       else {
-        isPaused = false;              // resume game
+        // RESUME the game
+        isPaused = false;
         cellLocked = false;
 
-        // resume timer from paused spot
+        // rebuild timer so it continues correctly
         timeStart = millis() - (hardTimeLimit - pausedTimeLeft) * 1000;
         timeLeft = pausedTimeLeft;
       }
     }
-    return; // stop here
-  }
-
-  // if paused, ignore all clicks
-  if (isPaused) {
     return;
   }
 
   // Clear button
   if (mouseX > clearX && mouseX < clearX + clearW &&
-      mouseY > clearY && mouseY < clearY + clearH) {
+    mouseY > clearY && mouseY < clearY + clearH) {
 
     if (gameWon || gameOver) return;   // don’t clear end screen
     playClick();                       // click sound
@@ -602,7 +603,7 @@ function mousePressed() {
 
   // Reveal button
   if (mouseX > revealX && mouseX < revealX + revealW &&
-      mouseY > revealY && mouseY < revealY + revealH) {
+    mouseY > revealY && mouseY < revealY + revealH) {
 
     if (gameWon || gameOver) return;   // block at end
     playClick();
@@ -612,7 +613,7 @@ function mousePressed() {
 
   // New Puzzle button
   if (mouseX > newX && mouseX < newX + newW &&
-      mouseY > newY && mouseY < newY + newH) {
+    mouseY > newY && mouseY < newY + newH) {
 
     playClick();
     newPuzzle();
@@ -621,7 +622,7 @@ function mousePressed() {
 
   // UNDO button
   if (mouseX > undoX && mouseX < undoX + undoW &&
-      mouseY > undoY && mouseY < undoY + undoH) {
+    mouseY > undoY && mouseY < undoY + undoH) {
 
     if (gameWon || gameOver) return;   // no undo after finish
     playClick();
@@ -650,7 +651,7 @@ function mousePressed() {
   let gridY = height / 2 - 320;
 
   if (mouseX >= gridX && mouseX < gridX + cellSize * 9 &&
-      mouseY >= gridY && mouseY < gridY + cellSize * 9) {
+    mouseY >= gridY && mouseY < gridY + cellSize * 9) {
 
     playClick(); // click only on grid
 
@@ -668,7 +669,7 @@ function mousePressed() {
 
   // EASY button
   if (mouseX >= easyX && mouseX < easyX + easyW &&
-      mouseY >= easyY && mouseY < easyY + easyH) {
+    mouseY >= easyY && mouseY < easyY + easyH) {
 
     playClick();
 
@@ -692,7 +693,7 @@ function mousePressed() {
 
   // HARD button
   if (mouseX >= hardX && mouseX < hardX + hardW &&
-      mouseY >= hardY && mouseY < hardY + hardH) {
+    mouseY >= hardY && mouseY < hardY + hardH) {
 
     playClick();
 
@@ -769,6 +770,106 @@ function keyPressed() {
     updateMistakes();
   }
 }
+
+
+function updateMistakes() {
+  board.updateMistakes();     // re check the whole board
+  copyBoardToGame();          // sync board data to the game
+
+  // Hard Mode (end the game if mistake limit is reached)
+  if (difficulty === "HARD" && board.mistakeCount >= hardMistakeLimit) {
+    gameOver = true;
+    cellLocked = true;        // stop any more input
+    selectedRow = -1;
+    selectedCol = -1;
+
+    // play game over sound once
+    if (!playedDefeat && defeatSound && defeatSound.isLoaded()) {
+      defeatSound.play();
+      playedDefeat = true;
+    }
+    return;
+  }
+
+  // check if the puzzle is fully solved
+  if (board.checkWin()) {
+    gameWon = true;
+    selectedRow = -1;
+    selectedCol = -1;
+    cellLocked = true;        // lock the board after winning
+
+    // play win sound once
+    if (!playedVictory && victorySound && victorySound.isLoaded()) {
+      victorySound.play();
+      playedVictory = true;
+    }
+  }
+}
+
+
+function clearGame() {
+  board.clearCurrentPuzzle(); // reset to the starting puzzle
+  copyBoardToGame();
+
+  selectedRow = -1;
+  selectedCol = -1;
+  cellLocked = false;
+  moveHistory = [];           // clear undo history
+}
+
+
+function newPuzzle() {
+  board.loadRandomPuzzle();   // load a completely new puzzle
+  copyBoardToGame();
+
+  gameWon = false;
+  gameOver = false;
+  cellLocked = false;
+  selectedRow = -1;
+  selectedCol = -1;
+
+  moveHistory = [];
+
+  // reset timer for a new game
+  timeStart = millis();
+  timeLeft = hardTimeLimit;
+
+  // reset pause state
+  isPaused = false;
+  pausedTimeLeft = 0;
+
+  // allow sounds to play again
+  playedVictory = false;
+  playedDefeat = false;
+
+  board.mistakeCount = 0;
+}
+
+
+function revealAnswer() {
+  board.revealAnswer();       // show the full solution
+  copyBoardToGame();
+
+  gameWon = true;             // treat reveal as a completed game
+  gameOver = false;
+  cellLocked = true;          // prevent further editing
+
+  selectedRow = -1;
+  selectedCol = -1;
+  moveHistory = [];
+
+  // make sure the game is not paused
+  isPaused = false;
+  pausedTimeLeft = 0;
+
+  // play win sound once
+  if (!playedVictory && victorySound && victorySound.isLoaded()) {
+    victorySound.play();
+    playedVictory = true;
+  }
+}
+
+
 
 
 // Checks whether a move by user follows Sudoku Rules (Row, Column, 3x3 Box)
