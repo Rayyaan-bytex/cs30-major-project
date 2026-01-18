@@ -1,158 +1,73 @@
 // Major Project - Sudoku
 // Rayyaan Chaghtai
-// 
 //
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
 
+// GLOBAL VARIABLES
 let easyPuzzleLines, easySolutionLines; // Loads lines from the puzzle/solution text files
 let puzzleLines, solutionLines;
+
 let puzzles = [];                       // Stores all puzzles/solutions after parsing
 let solutions = [];
 let easyPuzzles = [];
 let easySolutions = [];
+
 let difficulty = "HARD";                // Which mode the player is in
+
 let chosenPuzzle;                       // The puzzle/solution chosen for this round
 let chosenSolution = [];
-let currentGrid;                        // The grids the game uses   
+
+let currentGrid;                        // The grids the game uses
 let solutionGrid;
 let fixedGrid;
 let mistakeGrid;
 let startGrid;
+
 let selectedRow = -1;                   // Selected cell
 let selectedCol = -1;
+
 let cellLocked = false;                 // Basic flags
 let gameWon = false;
 let gameOver = false;
-let clearX, clearY, clearW, clearH;     // Top buttons
+
+// Top buttons
+let clearX, clearY, clearW, clearH;
 let revealX, revealY, revealW, revealH;
 let newX, newY, newW, newH;
-let easyX, easyY, easyW, easyH;
-let hardX, hardY, hardW, hardH;         // Difficulty buttons
 let undoX, undoY, undoW, undoH;
-let pauseX, pauseY, pauseW, pauseH;     // Pause button
-let board;                              // Main board 
+let pauseX, pauseY, pauseW, pauseH;
+
+// Difficulty buttons
+let easyX, easyY, easyW, easyH;
+let hardX, hardY, hardW, hardH;
+
+let board;                              // Main board
 let moveHistory = [];                   // Stores player moves for Undo
-let hardTimeLimit = 600;                // Timer
+
+// Timer (Hard mode)
+let hardTimeLimit = 600;
 let timeStart = 0;
 let timeLeft = hardTimeLimit;
-let isPaused = false;                   // Pause System
+
+// Pause system
+let isPaused = false;
 let pausedTimeLeft = 0;
-let hardMistakeLimit = 5;               // Mistakes Limit
-let clickSound;                         // Sound Effects
+
+// Mistake limit (Hard mode)
+let hardMistakeLimit = 5;
+
+// Sound effects
+let clickSound;
 let correctSound;
 let mistakeSound;
 let victorySound;
 let defeatSound;
-let playedVictory = false;              // Prevent repeating win/lose sounds
+
+// Prevent repeating win/lose sounds
+let playedVictory = false;
 let playedDefeat = false;
-
-
-class SudokuBoard {
-  constructor(puzzles, solutions) {
-    this.puzzles = puzzles;
-    this.solutions = solutions;
-    this.mistakeCount = 0;
-    this.difficulty = "hard";
-    this.loadRandomPuzzle();
-  }
-
-  loadRandomPuzzle() {
-    let index = floor(random(this.puzzles.length));
-    this.chosenPuzzle = this.puzzles[index];
-    this.chosenSolution = this.solutions[index];
-
-    this.currentGrid = convertToGrid(this.chosenPuzzle);
-    this.solutionGrid = convertToGrid(this.chosenSolution);
-
-    this.fixedGrid = copyGrid(this.currentGrid);
-    this.startGrid = copyGrid(this.currentGrid);
-
-    this.mistakeGrid = [];
-    for (let r = 0; r < 9; r++) {
-      let rowArray = [];
-      for (let c = 0; c < 9; c++) {
-        rowArray.push(false);
-      }
-      this.mistakeGrid.push(rowArray);
-    }
-    this.mistakeCount = 0;
-  }
-
-  setDifficulty(level) {
-    this.difficulty = level;
-    this.loadRandomPuzzle();
-  }
-
-  clearCurrentPuzzle() {
-    this.currentGrid = copyGrid(this.startGrid);
-    this.fixedGrid = copyGrid(this.startGrid);
-
-    for (let r = 0; r < 9; r++) {
-      for (let c = 0; c < 9; c++) {
-        this.mistakeGrid[r][c] = false;
-      }
-    }
-  }
-
-  revealAnswer() {
-    this.currentGrid = copyGrid(this.solutionGrid);     // Deletes the player's current progress and replaces it with a copy of the answer key.
-
-    for (let r = 0; r < 9; r++) {
-      for (let c = 0; c < 9; c++) {
-        this.mistakeGrid[r][c] = false;     // Clears all red mistakes
-      }
-    }
-  }
-
-  // Checks if cell's value matches the solution from the file
-  isCorrectCell(row, col) {
-    return this.currentGrid[row][col] === this.solutionGrid[row][col];
-
-  }
-
-  checkWin() {
-    for (let r = 0; r < 9; r++) {
-      for (let c = 0; c < 9; c++) {
-        if (this.currentGrid[r][c] === 0) {
-          return false;
-        }
-        if (this.currentGrid[r][c] !== this.solutionGrid[r][c]) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  updateMistakes() {
-    for (let r = 0; r < 9; r++) {
-      for (let c = 0; c < 9; c++) {
-        let value = this.currentGrid[r][c];     // Stores the number currently in this cell
-
-        if (value === 0 || this.fixedGrid[r][c] !== 0) {      // If cell is empty or same as original puzzle
-          this.mistakeGrid[r][c] = false; continue;     // Skip to the next cell
-        }
-        if (!this.isCorrectCell(r, c)) {      // If User's number doesn't match the solution
-          if (!this.mistakeGrid[r][c]) {    // Error not counted yet
-            this.mistakeCount++;      // Add 1 to players total mistakes
-          }
-          this.mistakeGrid[r][c] = true;      // Turns this cell red
-        }
-        else {
-          this.mistakeGrid[r][c] = false;     // Keeps it the same color (black)
-        }
-      }
-    }
-  }
-
-  setPuzzle(newPuzzles, newSolutions) {
-    this.puzzles = newPuzzles;
-    this.solutions = newSolutions;
-    this.loadRandomPuzzle();
-  }
-}
 
 
 // Loads the text/sound files before sketch starts
@@ -171,27 +86,6 @@ function preload() {
   defeatSound = loadSound("sounds/defeat.mp3");
 }
 
-
-// Helper functions to not repeat the same code everywhere
-function playClick() {
-  if (clickSound && clickSound.isLoaded()) {
-    clickSound.play();
-  }
-}
-
-function playCorrect() {
-  if (correctSound && correctSound.isLoaded()) {
-    correctSound.play();
-  }
-}
-
-function playMistake() {
-  if (mistakeSound && mistakeSound.isLoaded()) {
-    mistakeSound.play();
-  }
-}
-
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
@@ -208,18 +102,17 @@ function setup() {
     if (line[0] === "G") {        // Skip lines like 'Grid 01'"
       continue;
     }
-    tempPuzzle.push(line);        // Add the puzzle in temporary array
+    tempPuzzle.push(line);
 
-    // If 9 Lines are added, Puzzle Complete
     if (tempPuzzle.length === 9) {
-      puzzles.push(tempPuzzle.concat());    // Saves the Puzzle to Puzzle List
-      tempPuzzle = [];                      // Resets Array for Next Puzzle
+      puzzles.push(tempPuzzle.concat());
+      tempPuzzle = [];
     }
   }
 
   // Read Hard Solutions
   for (let line of solutionLines) {
-    if (line[0] === "G") {                  // Skip lines like 'Grid 01'"
+    if (line[0] === "G") {
       continue;
     }
     tempSolution.push(line);
@@ -247,29 +140,10 @@ function setup() {
 }
 
 
-// Turns the file lines into an array of 9 line grids
-function readGrid(lines) {
-  let all = [];               // Stores all puzzles
-  let temp = [];              // Stores 1 puzzle (9 Lines)
-
-  for (let line of lines) {
-    if (line[0] === "G") {    // Skip "Grid 01" Lines
-      continue;
-    }
-    temp.push(line);
-
-    if (temp.length === 9) {
-      all.push(temp.concat());  // Save Puzzle
-      temp = [];                // Reset for next one
-    }
-  }
-  return all;
-}
-
 function draw() {
   background("#e09db9ff");
 
-  // Timer (Hard mode only) 
+  // Timer (Hard mode only)
   if (!gameWon && !gameOver && difficulty === "HARD" && !isPaused) {
     let passedSec = floor((millis() - timeStart) / 1000);
     timeLeft = max(0, hardTimeLimit - passedSec);
@@ -288,6 +162,9 @@ function draw() {
       }
     }
   }
+
+  // --- UI Drawing starts here ---
+  // (We’re not making new functions yet, just keeping it readable)
 
   // Text Styling (default)
   textAlign(LEFT, CENTER);
@@ -348,9 +225,9 @@ function draw() {
 
   textSize(23);
   text(
-    "• Focus on rows, columns, and boxes:\n  Look for areas with only 1–2 empty cells.\n\n" +
-    "• Don’t guess, use logic:\n  Only place a number if it’s the only possible choice.\n\n" +
-    "• Scan the board:\n  Start with numbers that appear most often.",
+    "• Focus on rows, columns, and boxes:\n  Look for areas with only 1-2 empty cells.\n\n" +
+    "• Don't guess, use logic:\n  Only place a number if it's the only possible choice.\n\n" +
+    "• Scan the board:\n  Start with numbers tha t appear most often.",
     width / 2 - 900, 780
   );
 
@@ -460,7 +337,7 @@ function draw() {
     }
   }
 
-  // Highlights Selected Row/Col/Box
+  // Highlights Selected Row/Col/Box + same numbers
   if (selectedRow !== -1 && selectedCol !== -1) {
     let boxRow = floor(selectedRow / 3) * 3;
     let boxCol = floor(selectedCol / 3) * 3;
@@ -475,7 +352,6 @@ function draw() {
     fill(255, 255, 255, 25);
     rect(gridX + selectedCol * cellSize, gridY, cellSize, gridSize);
 
-    // Same number highlights
     let selectedValue = currentGrid[selectedRow][selectedCol];
     if (selectedValue !== 0) {
       fill(255, 255, 0, 80);
@@ -488,7 +364,6 @@ function draw() {
       }
     }
 
-    // Selected cell highlight
     fill(255, 255, 0, 110);
     rect(gridX + selectedCol * cellSize, gridY + selectedRow * cellSize, cellSize, cellSize);
   }
@@ -526,7 +401,7 @@ function draw() {
     text("GAME\nOVER!", lineX / 2 + 450, height / 2);
   }
 
-  // Pause
+  // Pause overlay
   if (isPaused) {
     noStroke();
     fill(0, 120);
@@ -558,7 +433,7 @@ function draw() {
 
 
 function mousePressed() {
-  // Pause / Resume Button
+  // Pause/Resume Button
   if (mouseX > pauseX &&
     mouseX < pauseX + pauseW &&
     mouseY > pauseY &&
@@ -566,11 +441,9 @@ function mousePressed() {
 
     playClick();   // button click sound
 
-    // don’t allow pausing after win or game over
-    if (!gameWon && !gameOver) {
+    if (!gameWon && !gameOver) {    // don’t allow pausing after win or game over
 
-      if (!isPaused) {
-        // PAUSE the game
+      if (!isPaused) {      // PAUSE the game
         isPaused = true;
         pausedTimeLeft = timeLeft;   // remember remaining time
 
@@ -578,186 +451,197 @@ function mousePressed() {
         selectedCol = -1;
         cellLocked = true;           // lock the grid
       }
-      else {
-        // RESUME the game
+      else {      // RESUME the game
         isPaused = false;
         cellLocked = false;
 
-        // rebuild timer so it continues correctly
-        timeStart = millis() - (hardTimeLimit - pausedTimeLeft) * 1000;
+        timeStart = millis() - (hardTimeLimit - pausedTimeLeft) * 1000;     // rebuild timer so it continues correctly
         timeLeft = pausedTimeLeft;
       }
     }
     return;
   }
 
-  // Clear button
+  // Clear Button
   if (mouseX > clearX && mouseX < clearX + clearW &&
     mouseY > clearY && mouseY < clearY + clearH) {
 
-    if (gameWon || gameOver) return;   // don’t clear end screen
-    playClick();                       // click sound
-    clearGame();                       // clear board
+    if (gameWon || gameOver) return;          // If the game already ended, don’t let Clear do anything
+
+    playClick();        // Sound for clicking a button
+
+    clearGame();        // Clears the board back to the starting puzzle
     return;
   }
 
-  // Reveal button
+  // Reveal Button
   if (mouseX > revealX && mouseX < revealX + revealW &&
     mouseY > revealY && mouseY < revealY + revealH) {
 
-    if (gameWon || gameOver) return;   // block at end
-    playClick();
-    revealAnswer();
+    if (gameWon || gameOver) return;          //  If the game already ended, don’t let Reveal do anything
+
+    playClick();      // click sound
+    revealAnswer();   // show the full solution
     return;
   }
 
-  // New Puzzle button
+  // New Puzzle Button
   if (mouseX > newX && mouseX < newX + newW &&
     mouseY > newY && mouseY < newY + newH) {
 
-    playClick();
-    newPuzzle();
+    playClick();   // click sound
+    newPuzzle();   // loads a completely new puzzle
     return;
   }
 
-  // UNDO button
+  // UNDO Button
   if (mouseX > undoX && mouseX < undoX + undoW &&
     mouseY > undoY && mouseY < undoY + undoH) {
 
-    if (gameWon || gameOver) return;   // no undo after finish
-    playClick();
+    if (gameWon || gameOver) return;
 
-    if (moveHistory.length > 0) {
-      let move = moveHistory.pop();    // last move
+    playClick(); // button click sound
 
-      currentGrid[move.row][move.col] = move.prevValue; // revert
+    if (moveHistory.length > 0) {         // Only undo if there’s actually something in history
 
-      selectedRow = move.row;          // go back to cell
+      let move = moveHistory.pop();       // Take the most recent move and remove it from history
+
+      currentGrid[move.row][move.col] = move.prevValue;   // Revert the cell back to what it was before that move
+
+      selectedRow = move.row;       // Move selection back to the same cell (feels natural)
       selectedCol = move.col;
-      cellLocked = false;
 
-      board.updateMistakes();          // re-check mistakes
+      cellLocked = false;           // Unlock so the player can type again
+
+      board.updateMistakes();       // Recount mistakes and sync board data
       copyBoardToGame();
 
-      gameWon = board.checkWin();      // re-check win
+      gameWon = board.checkWin();   // After undo, re check if puzzle is still won/still over
+
       gameOver = (difficulty === "HARD" && board.mistakeCount >= hardMistakeLimit);
     }
     return;
   }
 
-  // GRID click (select cell)
-  let cellSize = 85;
-  let gridX = width / 2 - 70;
-  let gridY = height / 2 - 320;
+  // Select Cell in Grid
+  let cellSize = 85;              // size of one cell
+  let gridX = width / 2 - 70;     // grid starting X
+  let gridY = height / 2 - 320;   // grid starting Y
 
-  if (mouseX >= gridX && mouseX < gridX + cellSize * 9 &&
+  if (mouseX >= gridX && mouseX < gridX + cellSize * 9 &&       // If the click was inside the 9x9 grid area
     mouseY >= gridY && mouseY < gridY + cellSize * 9) {
 
-    playClick(); // click only on grid
+    playClick();  // only play sound when clicking an actual cell
 
-    let newCol = floor((mouseX - gridX) / cellSize);
+    let newCol = floor((mouseX - gridX) / cellSize);          // Convert mouse position into row/col numbers
     let newRow = floor((mouseY - gridY) / cellSize);
 
-    if (newRow !== selectedRow || newCol !== selectedCol) {
-      cellLocked = false; // allow new input
+    if (newRow !== selectedRow || newCol !== selectedCol) {       // If user clicked a different cell, allow typing again
+      cellLocked = false;
     }
 
-    selectedCol = newCol;
+    selectedCol = newCol;         // Save the selected cell
     selectedRow = newRow;
-    return; // stop here (important)
+
+    return; 
   }
 
-  // EASY button
+  // Easy Button
   if (mouseX >= easyX && mouseX < easyX + easyW &&
     mouseY >= easyY && mouseY < easyY + easyH) {
 
-    playClick();
+    playClick(); // click sound
 
-    difficulty = "EASY";
+    difficulty = "EASY";          // Switch difficulty and load an easy puzzle set
     board.setPuzzle(easyPuzzles, easySolutions);
     copyBoardToGame();
 
-    gameWon = false;
+    gameWon = false;          // Reset game state 
     gameOver = false;
     selectedRow = -1;
     selectedCol = -1;
     cellLocked = false;
     moveHistory = [];
-
-    timeStart = millis();
+    timeStart = millis();         // Reset timer and pause system 
     timeLeft = hardTimeLimit;
     isPaused = false;
     pausedTimeLeft = 0;
+    playedVictory = false;        // Allow win/lose sounds to play again
+    playedDefeat = false;
+
     return;
   }
 
-  // HARD button
+  // Hard Button
   if (mouseX >= hardX && mouseX < hardX + hardW &&
     mouseY >= hardY && mouseY < hardY + hardH) {
 
-    playClick();
+    playClick();   // click sound
 
-    difficulty = "HARD";
+    difficulty = "HARD";        // Switch difficulty and load hard puzzles again
     board.setPuzzle(puzzles, solutions);
     copyBoardToGame();
 
-    gameWon = false;
+    gameWon = false;      // Reset game state 
     gameOver = false;
     selectedRow = -1;
     selectedCol = -1;
     cellLocked = false;
     moveHistory = [];
-
-    timeStart = millis();
+    timeStart = millis();     // Reset timer and pause system for hard mode
     timeLeft = hardTimeLimit;
     isPaused = false;
     pausedTimeLeft = 0;
+    playedVictory = false;      // Allow win/lose sounds to play again
+    playedDefeat = false;
+
     return;
   }
 }
 
-
-
 // Let User Enter and Delete Numbers (Not the Helper Numbers)
 function keyPressed() {
-  if (gameWon || gameOver || isPaused) return;         // ignore input now
-  if (selectedRow === -1 || selectedCol === -1) return; // no cell picked
-  if (fixedGrid[selectedRow][selectedCol] !== 0) return; // helper cell locked
 
-  // block overwriting unless you re click cell
-  if (cellLocked && key >= "1" && key <= "9") return;
+  if (gameWon || gameOver || isPaused) return;    // If the game is finished or paused, ignore all keyboard input
 
-  let prev = currentGrid[selectedRow][selectedCol];
+  if (selectedRow === -1 || selectedCol === -1) return; // If no cell is selected, do nothing
 
-  // number input
-  if (key >= "1" && key <= "9") {
-    let newVal = int(key);
+  if (fixedGrid[selectedRow][selectedCol] !== 0) return;  // If the selected cell is a fixed (given) number, block input
 
-    if (newVal !== prev) {
-      moveHistory.push({              // save move for undo
+  if (cellLocked && key >= "1" && key <= "9") return;       // Prevent typing over a number unless the cell was reselected
+
+  let prev = currentGrid[selectedRow][selectedCol];         // Store the current value before changing it (for undo)
+
+  if (key >= "1" && key <= "9") {   // If a number key (1–9) is pressed
+    let newVal = int(key);          // convert key to a number
+
+    if (newVal !== prev) {      // Only record the move if the value actually changes
+      moveHistory.push({
         row: selectedRow,
         col: selectedCol,
         prevValue: prev,
         newValue: newVal
       });
 
-      // play correct/wrong sound
-      if (newVal === solutionGrid[selectedRow][selectedCol]) {
+      if (newVal === solutionGrid[selectedRow][selectedCol]) {      // Play sound based on whether the number is correct or wrong
         playCorrect();
       } else {
         playMistake();
       }
     }
 
-    currentGrid[selectedRow][selectedCol] = newVal;
-    cellLocked = true;
-    updateMistakes();
+    currentGrid[selectedRow][selectedCol] = newVal;     // Place the number in the grid
+
+    cellLocked = true;        // Lock the cell so it can’t be overwritten immediately
+
+    updateMistakes();         // Recheck mistakes and win/lose conditions
   }
 
-  // delete / backspace
-  if (keyCode === BACKSPACE || keyCode === DELETE) {
+  if (keyCode === BACKSPACE || keyCode === DELETE) {      // If backspace or delete is pressed
+
+    // Save the delete action for undo (only if the cell was not empty)
     if (prev !== 0) {
-      moveHistory.push({              // save delete undo
+      moveHistory.push({
         row: selectedRow,
         col: selectedCol,
         prevValue: prev,
@@ -765,255 +649,276 @@ function keyPressed() {
       });
     }
 
-    currentGrid[selectedRow][selectedCol] = 0;
-    cellLocked = false;
+    currentGrid[selectedRow][selectedCol] = 0;      // Clear the selected cell
+
+    cellLocked = false;   // Unlock the cell so a new number can be entered
+
     updateMistakes();
   }
 }
 
 
 function updateMistakes() {
-  board.updateMistakes();     // re check the whole board
-  copyBoardToGame();          // sync board data to the game
+  board.updateMistakes();                 // re check all cells for mistakes
+  copyBoardToGame();                      // sync board data to main game grids
 
-  // Hard Mode (end the game if mistake limit is reached)
-  if (difficulty === "HARD" && board.mistakeCount >= hardMistakeLimit) {
-    gameOver = true;
-    cellLocked = true;        // stop any more input
-    selectedRow = -1;
+  if (difficulty === "HARD" && board.mistakeCount >= hardMistakeLimit) { // mistake limit reached
+    gameOver = true;                      // end the game
+    cellLocked = true;                    // stop further input
+    selectedRow = -1;                     // clear selection
     selectedCol = -1;
 
-    // play game over sound once
-    if (!playedDefeat && defeatSound && defeatSound.isLoaded()) {
+    if (!playedDefeat && defeatSound && defeatSound.isLoaded()) { // play defeat sound once
       defeatSound.play();
       playedDefeat = true;
     }
-    return;
+    return;                               
   }
 
-  // check if the puzzle is fully solved
-  if (board.checkWin()) {
-    gameWon = true;
-    selectedRow = -1;
+  if (board.checkWin()) {                 // check if puzzle is fully solved
+    gameWon = true;                       // mark game as won
+    selectedRow = -1;                     
     selectedCol = -1;
-    cellLocked = true;        // lock the board after winning
+    cellLocked = true;                    // lock board after win
 
-    // play win sound once
-    if (!playedVictory && victorySound && victorySound.isLoaded()) {
+    if (!playedVictory && victorySound && victorySound.isLoaded()) { // play win sound once
       victorySound.play();
       playedVictory = true;
     }
   }
 }
 
-
 function clearGame() {
-  board.clearCurrentPuzzle(); // reset to the starting puzzle
-  copyBoardToGame();
+  board.clearCurrentPuzzle();             // reset grid to starting puzzle
+  copyBoardToGame();                      
 
-  selectedRow = -1;
+  gameWon = false;                        // reset win flag
+  gameOver = false;                      
+  cellLocked = false;                    // allow input again
+  selectedRow = -1;                      // clear selection
   selectedCol = -1;
-  cellLocked = false;
-  moveHistory = [];           // clear undo history
+  moveHistory = [];                      // clear undo history
+  isPaused = false;                      // make sure game is not paused
+  pausedTimeLeft = 0;                    // reset paused timer value
+  playedVictory = false;                 // allow sounds again
+  playedDefeat = false;
 }
-
 
 function newPuzzle() {
-  board.loadRandomPuzzle();   // load a completely new puzzle
-  copyBoardToGame();
+  board.loadRandomPuzzle();               // load a completely new puzzle
+  copyBoardToGame();                      
 
-  gameWon = false;
+  gameWon = false;                        // reset game state
   gameOver = false;
   cellLocked = false;
   selectedRow = -1;
   selectedCol = -1;
-
-  moveHistory = [];
-
-  // reset timer for a new game
-  timeStart = millis();
+  moveHistory = [];                      // reset undo history
+  timeStart = millis();                  // restart timer
   timeLeft = hardTimeLimit;
-
-  // reset pause state
-  isPaused = false;
+  isPaused = false;                      // reset pause state
   pausedTimeLeft = 0;
-
-  // allow sounds to play again
-  playedVictory = false;
+  playedVictory = false;                 
   playedDefeat = false;
-
-  board.mistakeCount = 0;
 }
 
-
 function revealAnswer() {
-  board.revealAnswer();       // show the full solution
-  copyBoardToGame();
+  board.revealAnswer();                  // fill grid with correct solution
+  copyBoardToGame();                     
 
-  gameWon = true;             // treat reveal as a completed game
-  gameOver = false;
-  cellLocked = true;          // prevent further editing
-
-  selectedRow = -1;
+  cellLocked = true;                     // lock the grid (user can't edit)
+  selectedRow = -1;                     // clear selection
   selectedCol = -1;
-  moveHistory = [];
-
-  // make sure the game is not paused
-  isPaused = false;
+  gameWon = true;                        
+  gameOver = false;
+  moveHistory = [];                     
+  timeStart = millis();                 // reset timer display
+  timeLeft = hardTimeLimit;
+  isPaused = false;                     
   pausedTimeLeft = 0;
 
-  // play win sound once
+  playedDefeat = false;                 // allow victory sound
   if (!playedVictory && victorySound && victorySound.isLoaded()) {
-    victorySound.play();
+    victorySound.play();                
     playedVictory = true;
   }
 }
 
 
-
-
-// Checks whether a move by user follows Sudoku Rules (Row, Column, 3x3 Box)
-function isValidMove(row, col, value) {
-  // Checks Row
-  for (let c = 0; c < 9; c++) {
-    if (c !== col && currentGrid[row][c] === value) {      // Ignores the current column
-      return false;     // If same number already exists in this row, return false
-    }
+// Helper functions to not repeat the same code everywhere
+function playClick() {
+  if (clickSound && clickSound.isLoaded()) {   // make sure click sound exists and is loaded
+    clickSound.play();                         // play click sound
   }
-  // Checks Column
-  for (let r = 0; r < 9; r++) {
-    if (r !== row && currentGrid[r][col] === value) {      // Ignores the current row
-      return false;     // If same number already exists in this column, return false
-    }
-  }
-  // Checks 3x3 Box
-  let boxRowStart = floor(row / 3) * 3;     // Finds the starting row of 3x3 Box
-  let boxColStart = floor(col / 3) * 3;     // Finds the starting col of 3x3 Box
+}
 
-  for (let r = boxRowStart; r < boxRowStart + 3; r++) {
-    for (let c = boxColStart; c < boxColStart + 3; c++) {
-      if ((r !== row || c !== col) && currentGrid[r][c] === value) {
-        return false;     // If number already exists in box, return false
-      }
-    }
+function playCorrect() {
+  if (correctSound && correctSound.isLoaded()) { // check if correct sound is ready
+    correctSound.play();                         // play correct number sound
   }
-  // Return true if move passes all checks
-  return true;
+}
+
+function playMistake() {
+  if (mistakeSound && mistakeSound.isLoaded()) { // check if mistake sound is ready
+    mistakeSound.play();                         // play wrong number sound
+  }
 }
 
 
-// Check if a Single Cell Matches the Solution
-function isCorrectCell(row, col) {
-  return currentGrid[row][col] === solutionGrid[row][col];      // Check user input with the solution
-}
+// Turns the file lines into an array of 9 line grids
+function readGrid(lines) {
+  let all = [];            // stores all completed puzzles
+  let temp = [];           // temporarily holds one puzzle (9 lines)
 
+  for (let line of lines) {
+    if (line[0] === "G") { // skip lines like "Grid 01"
+      continue;
+    }
+    temp.push(line);       // add line to current puzzle
 
-function checkWin() {
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      if (currentGrid[r][c] === 0) {
-        return false;
-      }
-
-      if (currentGrid[r][c] !== solutionGrid[r][c]) {
-        return false;
-      }
+    if (temp.length === 9) { // once we have 9 lines
+      all.push(temp.concat()); // save full puzzle
+      temp = [];               // reset for next puzzle
     }
   }
-  return true;
+  return all;              // return all puzzles
 }
-
 
 // Convert the puzzle numbers into the 9x9 grid
 function convertToGrid(puzzle) {
-  let grid = [];
+  let grid = [];                    // final 9x9 number grid
 
-  for (let i = 0; i < 9; i++) {
-    let rowArray = [];        // Empty Array to represents a Single Row
-    for (let j = 0; j < 9; j++) {
-      rowArray.push(int(puzzle[i][j]));      // int converts the text like "5" to a number 5
+  for (let i = 0; i < 9; i++) {     // loop through each row
+    let rowArray = [];              // holds numbers for one row
+
+    for (let j = 0; j < 9; j++) {   // loop through each column
+      rowArray.push(int(puzzle[i][j])); // convert char to number and store it
     }
-    grid.push(rowArray);      // Add Completed Row of Nums to Main Grid
-  }
-  return grid;
-}
 
+    grid.push(rowArray);            // add completed row to grid
+  }
+
+  return grid;                      // return the full grid
+}
 
 // Makes a copy of a 2D grid so the original puzzle cannot be changed
 function copyGrid(grid) {
-  let newGrid = [];
+  let newGrid = [];        // new grid to avoid changing original
   for (let row = 0; row < 9; row++) {
-    newGrid.push(grid[row].concat());     // creates a copy of the row array
+    newGrid.push(grid[row].concat()); // copy each row
   }
-
-  return newGrid;
+  return newGrid;          // return the copied grid
 }
 
-
+// Pull board grids into global variables (so draw/input can use them easily)
 function copyBoardToGame() {
-  currentGrid = board.currentGrid;
-  solutionGrid = board.solutionGrid;
-  fixedGrid = board.fixedGrid;
-  startGrid = board.startGrid;
-  mistakeGrid = board.mistakeGrid;
-}
-
-// clear Current Puzzle
-function clearGame() {
-  board.clearCurrentPuzzle();
-  copyBoardToGame();
-
-  gameWon = false;
-  gameOver = false;
-  cellLocked = false;
-  selectedRow = -1;
-  selectedCol = -1;
-  moveHistory = [];
-  isPaused = false;
-  pausedTimeLeft = 0;
-  playedVictory = false;
-  playedDefeat = false;
+  currentGrid = board.currentGrid;     // sync current grid
+  solutionGrid = board.solutionGrid;   // sync solution grid
+  fixedGrid = board.fixedGrid;         // sync fixed cells
+  startGrid = board.startGrid;         // sync starting grid
+  mistakeGrid = board.mistakeGrid;     // sync mistake tracking
 }
 
 
-// Reveal Full Solution On The Board
-function revealAnswer() {
-  board.revealAnswer();
-  copyBoardToGame();
-
-  cellLocked = true;
-  selectedRow = -1;
-  selectedCol = -1;
-  gameWon = true;
-  gameOver = false;
-  moveHistory = [];
-  timeStart = millis();
-  timeLeft = hardTimeLimit;
-  isPaused = false;
-  pausedTimeLeft = 0;
-  playedDefeat = false;
-  if (!playedVictory && victorySound && victorySound.isLoaded()) {
-    victorySound.play();
-    playedVictory = true;
+// main logic of the sudoku board and data
+class SudokuBoard {                                        
+  constructor(puzzles, solutions) {                   // runs once when you create the board
+    this.puzzles = puzzles;                           // store all puzzle options (hard/easy set)
+    this.solutions = solutions;                       // store matching solutions
+    this.mistakeCount = 0;                            // total mistakes made so far
+    this.difficulty = "hard";                         // default difficulty label
+    this.loadRandomPuzzle();                          // instantly start with a random puzzle
   }
-}
 
+  loadRandomPuzzle() {                                      // picks a random puzzle and builds all grids
+    let index = floor(random(this.puzzles.length));          // random puzzle index
+    this.chosenPuzzle = this.puzzles[index];                 // the actual puzzle (9 lines)
+    this.chosenSolution = this.solutions[index];             // matching solution (9 lines)
 
-// Load a New Puzzle on the Grid
-function newPuzzle() {
-  board.loadRandomPuzzle();
-  copyBoardToGame();
+    this.currentGrid = convertToGrid(this.chosenPuzzle);     // player's working grid 
+    this.solutionGrid = convertToGrid(this.chosenSolution);  // correct answer grid 
 
-  gameWon = false;
-  gameOver = false;
-  cellLocked = false;
-  selectedRow = -1;
-  selectedCol = -1;
-  moveHistory = [];
-  timeStart = millis();
-  timeLeft = hardTimeLimit;
-  isPaused = false;
-  pausedTimeLeft = 0;
-  playedVictory = false;
-  playedDefeat = false;
+    this.fixedGrid = copyGrid(this.currentGrid);             // helper numbers that can’t be edited
+    this.startGrid = copyGrid(this.currentGrid);             // original puzzle state (for Clear button)
+
+    this.mistakeGrid = [];                                   // true/false grid for red mistake cells
+    for (let r = 0; r < 9; r++) {                            
+      let rowArray = [];                                     
+      for (let c = 0; c < 9; c++) {                          
+        rowArray.push(false);                                // start with “not a mistake”
+      }
+      this.mistakeGrid.push(rowArray);                       // add completed row to mistakeGrid
+    }
+
+    this.mistakeCount = 0;                                   // reset mistakes when new puzzle loads
+  }
+
+  setDifficulty(level) {                                     // switches difficulty and reloads puzzle
+    this.difficulty = level;                                 // save the new difficulty label
+    this.loadRandomPuzzle();                                 // restart with a new puzzle
+  }
+
+  clearCurrentPuzzle() {                                     // resets board back to its starting puzzle
+    this.currentGrid = copyGrid(this.startGrid);             // undo all player inputs
+    this.fixedGrid = copyGrid(this.startGrid);               // reset the helper numbers too
+
+    for (let r = 0; r < 9; r++) {                            // clear the red mistake marks
+      for (let c = 0; c < 9; c++) {
+        this.mistakeGrid[r][c] = false;                      // nothing is marked wrong anymore
+      }
+    }
+  }
+
+  revealAnswer() {                                           // fills board with the full solution
+    this.currentGrid = copyGrid(this.solutionGrid);          // replace player grid with answer grid
+
+    for (let r = 0; r < 9; r++) {                            // remove all red mistake marks
+      for (let c = 0; c < 9; c++) {
+        this.mistakeGrid[r][c] = false;                      // solved board shouldn’t show mistakes
+      }
+    }
+  }
+
+  isCorrectCell(row, col) {                                  
+    return this.currentGrid[row][col] === this.solutionGrid[row][col]; // compare against solution
+  }
+
+  checkWin() {                                               // checks if the entire board is solved
+    for (let r = 0; r < 9; r++) {                            // check every cell
+      for (let c = 0; c < 9; c++) {
+        if (this.currentGrid[r][c] === 0) return false;      // still empty means not solved
+        if (this.currentGrid[r][c] !== this.solutionGrid[r][c]) return false; // wrong value means not solved
+      }
+    }
+    return true;                                             // every cell matches solution means win
+  }
+
+  updateMistakes() {                                         // updates red cells and counts new mistakes
+    for (let r = 0; r < 9; r++) {                            // go through every cell
+      for (let c = 0; c < 9; c++) {
+        let value = this.currentGrid[r][c];                  // number currently in this cell
+
+        if (value === 0 || this.fixedGrid[r][c] !== 0) {     // skip blanks and original “given” numbers
+          this.mistakeGrid[r][c] = false;                    // those should never be red
+          continue;                                          // move on to next cell
+        }
+
+        if (!this.isCorrectCell(r, c)) {                     // player enters wrong
+          if (!this.mistakeGrid[r][c]) {                     // only count it if it wasn’t already wrong
+            this.mistakeCount++;                             // add one to total mistakes
+          }
+          this.mistakeGrid[r][c] = true;                     // mark this cell red
+        }
+        else {                                               // player typed the correct number
+          this.mistakeGrid[r][c] = false;                    // keep it normal color (black)
+        }
+      }
+    }
+  }
+
+  setPuzzle(newPuzzles, newSolutions) {                      // swaps the puzzle set (easy vs hard)
+    this.puzzles = newPuzzles;                               // replace puzzle list
+    this.solutions = newSolutions;                           // replace solution list
+    this.loadRandomPuzzle();                                 // restart with a random puzzle from new set
+  }
 }
