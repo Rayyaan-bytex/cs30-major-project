@@ -332,7 +332,8 @@ function draw() {
 
   if (isPaused) {
     text("RESUME", pauseX + pauseW / 2, pauseY + pauseH / 2);
-  } else {
+  }
+  else {
     text("PAUSE", pauseX + pauseW / 2, pauseY + pauseH / 2);
   }
 
@@ -419,7 +420,8 @@ function draw() {
     textSize(80);
     fill(255);
     text("PAUSED", gridX + gridSize / 2, gridY + gridSize / 2);
-  } else {
+  }
+  else {
     // Draw numbers normally
     textAlign(CENTER, CENTER);
     textFont("light montessarat");
@@ -478,8 +480,9 @@ function mousePressed() {
   if (mouseX > clearX && mouseX < clearX + clearW &&
     mouseY > clearY && mouseY < clearY + clearH) {
 
-    if (gameWon || gameOver) return;          // If the game already ended, don’t let Clear do anything
-
+    if (gameWon || gameOver) {
+      return;          // If the game already ended, don’t let Clear do anything
+    }
     playClick();        // Sound for clicking a button
 
     clearGame();        // Clears the board back to the starting puzzle
@@ -490,8 +493,9 @@ function mousePressed() {
   if (mouseX > revealX && mouseX < revealX + revealW &&
     mouseY > revealY && mouseY < revealY + revealH) {
 
-    if (gameWon || gameOver) return;          //  If the game already ended, don’t let Reveal do anything
-
+    if (gameWon || gameOver) {
+      return;          //  If the game already ended, don’t let Reveal do anything
+    }
     playClick();      // click sound
     revealAnswer();   // show the full solution
     return;
@@ -510,8 +514,9 @@ function mousePressed() {
   if (mouseX > undoX && mouseX < undoX + undoW &&
     mouseY > undoY && mouseY < undoY + undoH) {
 
-    if (gameWon || gameOver) return;
-
+    if (gameWon || gameOver) {
+      return;
+    }
     playClick(); // button click sound
 
     if (moveHistory.length > 0) {         // Only undo if there’s actually something in history
@@ -530,7 +535,7 @@ function mousePressed() {
 
       gameWon = board.checkWin();   // After undo, re check if puzzle is still won/still over
 
-      gameOver = (difficulty === "HARD" && board.mistakeCount >= hardMistakeLimit);
+      gameOver = difficulty === "HARD" && board.mistakeCount >= hardMistakeLimit;
     }
     return;
   }
@@ -614,14 +619,18 @@ function mousePressed() {
 // Let User Enter and Delete Numbers (Not the Helper Numbers)
 function keyPressed() {
 
-  if (gameWon || gameOver || isPaused) return;    // If the game is finished or paused, ignore all keyboard input
-
-  if (selectedRow === -1 || selectedCol === -1) return; // If no cell is selected, do nothing
-
-  if (fixedGrid[selectedRow][selectedCol] !== 0) return;  // If the selected cell is a fixed (given) number, block input
-
-  if (cellLocked && key >= "1" && key <= "9") return;       // Prevent typing over a number unless the cell was reselected
-
+  if (gameWon || gameOver || isPaused) {
+    return;    // If the game is finished or paused, ignore all keyboard input
+  }
+  if (selectedRow === -1 || selectedCol === -1) {
+    return; // If no cell is selected, do nothing
+  }
+  if (fixedGrid[selectedRow][selectedCol] !== 0) {
+    return;  // If the selected cell is a fixed (given) number, block input
+  }
+  if (cellLocked && key >= "1" && key <= "9") {
+    return;       // Prevent typing over a number unless the cell was reselected
+  }
   let prev = currentGrid[selectedRow][selectedCol];         // Store the current value before changing it (for undo)
 
   if (key >= "1" && key <= "9") {   // If a number key (1–9) is pressed
@@ -637,7 +646,8 @@ function keyPressed() {
 
       if (newVal === solutionGrid[selectedRow][selectedCol]) {      // Play sound based on whether the number is correct or wrong
         playCorrect();
-      } else {
+      }
+      else {
         playMistake();
       }
     }
@@ -898,8 +908,12 @@ class SudokuBoard {
   checkWin() {                                               // checks if the entire board is solved
     for (let r = 0; r < 9; r++) {                            // check every cell
       for (let c = 0; c < 9; c++) {
-        if (this.currentGrid[r][c] === 0) return false;      // still empty means not solved
-        if (this.currentGrid[r][c] !== this.solutionGrid[r][c]) return false; // wrong value means not solved
+        if (this.currentGrid[r][c] === 0) {
+          return false;      // still empty means not solved
+        }
+        if (this.currentGrid[r][c] !== this.solutionGrid[r][c]) {
+          return false; // wrong value means not solved
+        }
       }
     }
     return true;                                             // every cell matches solution means win
