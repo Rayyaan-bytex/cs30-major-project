@@ -9,6 +9,6 @@
 
 ## Non-Programmer's advice:
 - The game was fun and easy to play and the rules were easy to understand
-- The buttons like pause and resume was helpful when taking a break
+- The buttons like pause and resume were helpful when taking a break
 - The sound effects made the game more interactive
-- I had to adjust my zoom settings for the game to work fine
+- I had to adjust my zoom settings for the game to be properly visual
