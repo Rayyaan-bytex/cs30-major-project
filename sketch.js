@@ -2,7 +2,8 @@
 // Rayyaan Chaghtai
 //
 // Extra for Experts:
-// - describe what you did to take this project "above and beyond"
+// - I added sound effects for different parts of the game like clicking buttons, entering correct or wrong numbers, 
+// and when the player wins or loses. I also made sure the sounds only play at the right time and don’t repeat again.
 
 
 // GLOBAL VARIABLES
