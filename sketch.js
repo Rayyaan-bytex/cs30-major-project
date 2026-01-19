@@ -87,6 +87,7 @@ function preload() {
   defeatSound = loadSound("sounds/defeat.mp3");
 }
 
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
@@ -110,6 +111,7 @@ function setup() {
       tempPuzzle = [];
     }
   }
+
 
   // Read Hard Solutions
   for (let line of solutionLines) {
@@ -615,6 +617,7 @@ function mousePressed() {
   }
 }
 
+
 // Let User Enter and Delete Numbers (Not the Helper Numbers)
 function keyPressed() {
 
@@ -709,6 +712,7 @@ function updateMistakes() {
   }
 }
 
+
 function clearGame() {
   board.clearCurrentPuzzle();             // reset grid to starting puzzle
   copyBoardToGame();
@@ -724,6 +728,7 @@ function clearGame() {
   playedVictory = false;                 // allow sounds again
   playedDefeat = false;
 }
+
 
 function newPuzzle() {
   board.loadRandomPuzzle();               // load a completely new puzzle
@@ -742,6 +747,7 @@ function newPuzzle() {
   playedVictory = false;
   playedDefeat = false;
 }
+
 
 function revealAnswer() {
   board.revealAnswer();                  // fill grid with correct solution
@@ -773,11 +779,13 @@ function playClick() {
   }
 }
 
+
 function playCorrect() {
   if (correctSound && correctSound.isLoaded()) { // check if correct sound is ready
     correctSound.play();                         // play correct number sound
   }
 }
+
 
 function playMistake() {
   if (mistakeSound && mistakeSound.isLoaded()) { // check if mistake sound is ready
@@ -805,6 +813,7 @@ function readGrid(lines) {
   return all;              // return all puzzles
 }
 
+
 // Convert the puzzle numbers into the 9x9 grid
 function convertToGrid(puzzle) {
   let grid = [];                    // final 9x9 number grid
@@ -822,6 +831,7 @@ function convertToGrid(puzzle) {
   return grid;                      // return the full grid
 }
 
+
 // Makes a copy of a 2D grid so the original puzzle cannot be changed
 function copyGrid(grid) {
   let newGrid = [];        // new grid to avoid changing original
@@ -830,6 +840,7 @@ function copyGrid(grid) {
   }
   return newGrid;          // return the copied grid
 }
+
 
 // Pull board grids into global variables (so draw/input can use them easily)
 function copyBoardToGame() {
