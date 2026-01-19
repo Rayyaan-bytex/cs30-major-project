@@ -5,7 +5,7 @@
 - For my Major Project, I plan to make a simple Sudoku game in which the user will have to fill a 9 x 9 grid with numbers
 - Each column, row, and a 3 x 3 subgrid contains each number from 1 to 9 exactly once
 - https://www.websudoku.com/ 
-- ⬆️Inspired the overall UI and how a clean Sudoku game should look and feel
+- ⬆️Inspired the overall UI and how a Sudoku game should look
 - https://projecteuler.net/resources/documents/0096_sudoku.txt
 - ⬆️Provided a large set of Sudoku puzzles used to build the game
 - https://sudoku.com/
