@@ -127,16 +127,20 @@ function setup() {
   board = new SudokuBoard(puzzles, solutions);
   copyBoardToGame();
 
-  // Start timer and reset game flags
-  timeStart = millis();
+  timeStart = millis();       // Start timer and reset game flags
   timeLeft = hardTimeLimit;
   moveHistory = [];
   gameOver = false;
   gameWon = false;
 
-  // Reset sound flags
-  playedVictory = false;
+  playedVictory = false;    // Reset sound flags
   playedDefeat = false;
+
+  isPaused = true;                 // start paused 
+  pausedTimeLeft = timeLeft;       // store current timeLeft
+  cellLocked = true;               // lock grid input
+  selectedRow = -1;                // no selected cell
+  selectedCol = -1;
 }
 
 
@@ -174,32 +178,35 @@ function draw() {
 
   // LEFT PANEL (Instructions + Tips)
   textSize(100);
-  text("SUDOKU", width / 2 - 900, 140);
+  text("SUDOKU", width / 2 - 900, 80);
 
   textSize(45);
-  text("HOW TO PLAY", width / 2 - 900, 225);
+  text("HOW TO PLAY", width / 2 - 900, 160);
 
   textSize(23);
   text(
     "To complete the Sudoku grid\n" +
     "Enter numbers into the blank spaces\n" +
     "So that each row, column, and 3x3 box\n" +
-    "Contains the numbers 1 - 9 without repitition",
-    width / 2 - 900, 320
-  );
+    "Contains the numbers 1-9 without repetition.\n" +
+    "Click a cell, then press a number (1-9) to enter it.\n" +
+    "Press BACKSPACE or DELETE to clear a cell.\n" +
+    "The game starts paused.\n" +
+    "Press RESUME to begin playing.",
+    width / 2 - 900, 300);
 
   textSize(45);
-  text("DIFFICULTY LEVELS", width / 2 - 900, 430);
+  text("DIFFICULTY LEVELS", width / 2 - 900, 460);
 
   // Show selected difficulty
   textSize(35);
   fill(0);
-  text("Selected: " + difficulty, width / 2 - 900, 490);
+  text("Selected: " + difficulty, width / 2 - 900, 520);
 
-  // Difficulty button sizes + positions
+  // Difficulty button sizes and positions
   easyW = 170; easyH = 55;
   easyX = width / 2 - 900;
-  easyY = 520;
+  easyY = 550;
 
   hardW = 170; hardH = 55;
   hardX = easyX + easyW + 40;
@@ -221,13 +228,13 @@ function draw() {
   textAlign(LEFT, CENTER);
   fill("#2e351dff");
   textSize(45);
-  text("TIPS FOR SOLVING", width / 2 - 900, 630);
+  text("TIPS FOR SOLVING", width / 2 - 900, 660);
 
   textSize(23);
   text(
-    "• Focus on rows, columns, and boxes:\n  Look for areas with only 1-2 empty cells.\n\n" +
-    "• Don't guess, use logic:\n  Only place a number if it's the only possible choice.\n\n" +
-    "• Scan the board:\n  Start with numbers tha t appear most often.",
+    "• Focus on rows, columns, and boxes:\n  Look for areas with only 1-2 empty cells.\n" +
+    "• Don't guess, use logic:\n  Only place a number if it's the only possible choice.\n" +
+    "• Scan the board:\n  Start with numbers that appear most often.",
     width / 2 - 900, 780
   );
 
@@ -462,6 +469,10 @@ function mousePressed() {
     return;
   }
 
+  if (isPaused) {
+    return;
+  }      // block all other clicks while paused
+
   // Clear Button
   if (mouseX > clearX && mouseX < clearX + clearW &&
     mouseY > clearY && mouseY < clearY + clearH) {
@@ -543,7 +554,7 @@ function mousePressed() {
     selectedCol = newCol;         // Save the selected cell
     selectedRow = newRow;
 
-    return; 
+    return;
   }
 
   // Easy Button
@@ -672,12 +683,12 @@ function updateMistakes() {
       defeatSound.play();
       playedDefeat = true;
     }
-    return;                               
+    return;
   }
 
   if (board.checkWin()) {                 // check if puzzle is fully solved
     gameWon = true;                       // mark game as won
-    selectedRow = -1;                     
+    selectedRow = -1;
     selectedCol = -1;
     cellLocked = true;                    // lock board after win
 
@@ -690,10 +701,10 @@ function updateMistakes() {
 
 function clearGame() {
   board.clearCurrentPuzzle();             // reset grid to starting puzzle
-  copyBoardToGame();                      
+  copyBoardToGame();
 
   gameWon = false;                        // reset win flag
-  gameOver = false;                      
+  gameOver = false;
   cellLocked = false;                    // allow input again
   selectedRow = -1;                      // clear selection
   selectedCol = -1;
@@ -706,7 +717,7 @@ function clearGame() {
 
 function newPuzzle() {
   board.loadRandomPuzzle();               // load a completely new puzzle
-  copyBoardToGame();                      
+  copyBoardToGame();
 
   gameWon = false;                        // reset game state
   gameOver = false;
@@ -718,28 +729,28 @@ function newPuzzle() {
   timeLeft = hardTimeLimit;
   isPaused = false;                      // reset pause state
   pausedTimeLeft = 0;
-  playedVictory = false;                 
+  playedVictory = false;
   playedDefeat = false;
 }
 
 function revealAnswer() {
   board.revealAnswer();                  // fill grid with correct solution
-  copyBoardToGame();                     
+  copyBoardToGame();
 
   cellLocked = true;                     // lock the grid (user can't edit)
   selectedRow = -1;                     // clear selection
   selectedCol = -1;
-  gameWon = true;                        
+  gameWon = true;
   gameOver = false;
-  moveHistory = [];                     
+  moveHistory = [];
   timeStart = millis();                 // reset timer display
   timeLeft = hardTimeLimit;
-  isPaused = false;                     
+  isPaused = false;
   pausedTimeLeft = 0;
 
   playedDefeat = false;                 // allow victory sound
   if (!playedVictory && victorySound && victorySound.isLoaded()) {
-    victorySound.play();                
+    victorySound.play();
     playedVictory = true;
   }
 }
@@ -821,7 +832,7 @@ function copyBoardToGame() {
 
 
 // main logic of the sudoku board and data
-class SudokuBoard {                                        
+class SudokuBoard {
   constructor(puzzles, solutions) {                   // runs once when you create the board
     this.puzzles = puzzles;                           // store all puzzle options (hard/easy set)
     this.solutions = solutions;                       // store matching solutions
@@ -842,9 +853,9 @@ class SudokuBoard {
     this.startGrid = copyGrid(this.currentGrid);             // original puzzle state (for Clear button)
 
     this.mistakeGrid = [];                                   // true/false grid for red mistake cells
-    for (let r = 0; r < 9; r++) {                            
-      let rowArray = [];                                     
-      for (let c = 0; c < 9; c++) {                          
+    for (let r = 0; r < 9; r++) {
+      let rowArray = [];
+      for (let c = 0; c < 9; c++) {
         rowArray.push(false);                                // start with “not a mistake”
       }
       this.mistakeGrid.push(rowArray);                       // add completed row to mistakeGrid
@@ -879,7 +890,7 @@ class SudokuBoard {
     }
   }
 
-  isCorrectCell(row, col) {                                  
+  isCorrectCell(row, col) {
     return this.currentGrid[row][col] === this.solutionGrid[row][col]; // compare against solution
   }
 
