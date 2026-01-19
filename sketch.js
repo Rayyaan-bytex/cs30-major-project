@@ -100,7 +100,7 @@ function setup() {
 
   // Read Hard Puzzles
   for (let line of puzzleLines) {
-    if (line[0] === "G") {        // Skip lines like 'Grid 01'"
+    if (line[0] === "G") {        // Skip lines like 'Grid 01'
       continue;
     }
     tempPuzzle.push(line);
@@ -168,16 +168,15 @@ function draw() {
     }
   }
 
-  // --- UI Drawing starts here ---
-  // (We’re not making new functions yet, just keeping it readable)
 
-  // Text Styling (default)
+
+  // Text Styling 
   textAlign(LEFT, CENTER);
   fill("#2e351dff");
   textFont("Montserrat");
   noStroke();
 
-  // LEFT PANEL (Instructions + Tips)
+  // LEFT PANEL (Instructions and Tips)
   textSize(100);
   text("SUDOKU", width / 2 - 900, 80);
 
