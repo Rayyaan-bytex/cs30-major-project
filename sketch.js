@@ -1,4 +1,5 @@
-// Major Project - Sudoku
+// Major Project - Sudoku Game
+// Jan 19, 2026
 // Rayyaan Chaghtai
 //
 // Extra for Experts:
